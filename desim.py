@@ -141,8 +141,7 @@ def deshima_sensitivity2(
     R = 500, # scalar. R = Q = F/FWHM = F/dF is assumed.
     eta_M1_spill = 0.99, # scalar or vector
     eta_M2_spill = 0.90, # scalar or vector
-    eta_wo = 0.99, # scalar or vector. product of all cabin loss (ohmic and spillover)\
-    n_wo_mirrors = 4, # scalar
+    eta_wo = 0.99, # scalar or vector. product of all cabin loss
     eta_co = 0.65, # scalar or vector. product of co spillover, qo filter transmission
     eta_lens_antenna_rad = 0.81, # scalar or vector. D2_2V3.pdf, p14: front-to-back ratio 0.93 * reflection efficiency 0.9 * matching 0.98 * antenna spillover 0.993
     eta_circuit = 0.45, # scalar or vector. 'Alejandro Efficiency', from the feedpoint of the antenna to being absorbed in the KID.
