@@ -246,7 +246,7 @@ def deshima_sensitivity2(
         pd.Series(P_KID,name='P_KID (W)'),
         pd.Series(NEP_KID,name='NEP_KID'),
         pd.Series(NEP_inst,name='NEP_inst'),
-        pd.Series(NEFD_*10**26,name='NEFD'),
+        pd.Series(NEFD_,name='NEFD'),
         pd.Series(NEF,name='NEF'),
         pd.Series(MDLF,name='MDLF'),
         pd.Series(snr,name='SNR'),
