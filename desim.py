@@ -154,7 +154,8 @@ def deshima_sensitivity2(
     Tp_co = 4., # scalar
     Tp_chip = 0.12, # scalar
     snr = 5.,
-    integ_hours = 10.
+    obs_hours = 10.,
+    on_source_fraction=0.4
     ):
 
     eta_M1_ohmic = Al_refl_ohmic_loss
@@ -172,7 +173,7 @@ def deshima_sensitivity2(
     W_F = 0.5*np.pi*F/R
 
     # Calcuate eta. scalar/vector depending on F.
-    eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL)
+    eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
 
     # Calculate the intrinsic Johnson-Nyquist power for all physical temperatures
     Pjn_cmb     = jn(F=F,T=Tb_cmb)
@@ -218,7 +219,7 @@ def deshima_sensitivity2(
         )
 
     NEF = NEFD_ * W_F
-    MDLF = NEF * snr / np.sqrt(integ_hours*60.*60.)
+    MDLF = NEF * snr / np.sqrt(obs_hours*on_source_fraction*60.*60.)
 
     Trx = NEP_inst/k/np.sqrt(2*W_F) - T_CW(F,PF_wo)
 
@@ -226,9 +227,13 @@ def deshima_sensitivity2(
 
     result = pd.concat([
         pd.Series(F,name='F'),
+        pd.Series(pwv,name='PWV'),
+        pd.Series(EL,name='EL'),
         pd.Series(eta_atm,name='eta_atm'),
         pd.Series(R,name='R'),
         pd.Series(W_F,name='W_F'),
+        pd.Series(theta_maj,name='theta_maj'),
+        pd.Series(theta_maj,name='theta_min'),
         pd.Series(eta_a,name='eta_a'),
         pd.Series(eta_forward,name='eta_forward'),
         pd.Series(eta_sw,name='eta_sw'),
@@ -249,7 +254,8 @@ def deshima_sensitivity2(
         pd.Series(NEF,name='NEF'),
         pd.Series(MDLF,name='MDLF'),
         pd.Series(snr,name='SNR'),
-        pd.Series(integ_hours,name='integ_hours'),
+        pd.Series(obs_hours,name='obs_hours'),
+        pd.Series(obs_hours*on_source_fraction,name='on_source_hours'),
         pd.Series(Trx,name='Equivalent Trx'),
         ],axis=1
         )
@@ -267,12 +273,21 @@ def deshima_sensitivity2(
 # 1) PWV, 2) frequency 3) elevation.
 
 
-def eta_atm_func(F, pwv, EL=60.):
+def eta_atm_func(F, pwv, EL=60., R=0):
         if np.average(F) > 10.**9:
             F = F / 10.**9
         eta_atm_df = pd.read_csv(os.path.dirname(__file__)+'/data/atm.csv',skiprows=4,delim_whitespace=True,header=0)
         eta_atm_func_zenith = eta_atm_interp(eta_atm_df)
-        eta_atm = np.abs(eta_atm_func_zenith(pwv, F)) ** (1./np.sin(EL*np.pi/180.))
+
+        if R==0:
+            eta_atm = np.abs(eta_atm_func_zenith(pwv, F)) ** (1./np.sin(EL*np.pi/180.))
+        else: # smooth with spectrometer resolution
+            F_highres = eta_atm_df['F'] # 100.0, 100.1., ....., 1000 GHz as in the original data.
+            eta_atm_zenith_highres = eta_atm_func_zenith(pwv,F_highres)
+            eta_atm = np.zeros(len(F))
+            for i_ch in range(len(F)):
+                eta_atm[i_ch] = np.mean(eta_atm_zenith_highres[ (F_highres >F[i_ch]*(1-0.5/R) ) & (F_highres < F[i_ch]*(1+0.5/R) )])
+            eta_atm = [eta_atm]
         if len(eta_atm)==1:
             eta_atm = eta_atm[0]
         else:
