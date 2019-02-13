@@ -107,15 +107,16 @@ def deshima_sensitivity(
     # Make Pandas DataFrame out of the result
 
     result = pd.concat([
-        pd.Series(F,name='F'),
+        pd.Series(F,name='F'),　
         pd.Series(pwv,name='PWV'),
         pd.Series(EL,name='EL'),
         pd.Series(eta_atm,name='eta_atm'),
         pd.Series(R,name='R'),
         pd.Series(W_F,name='W_F'),
         pd.Series(theta_maj,name='theta_maj'),
-        pd.Series(theta_maj,name='theta_min'),
+        pd.Series(theta_min,name='theta_min'),
         pd.Series(eta_a,name='eta_a'),
+        pd.Series(eta_mb,name='eta_mb'),
         pd.Series(eta_forward,name='eta_forward'),
         pd.Series(eta_sw,name='eta_sw'),
         pd.Series(eta_window,name='eta_window'),
@@ -129,6 +130,7 @@ def deshima_sensitivity(
         pd.Series(T_CW(F,PF_co),name='Tb_co'),
         pd.Series(T_CW(F,PF_KID),name='Tb_KID'),
         pd.Series(P_KID,name='P_KID (W)'),
+        pd.Series(P_KID/(W_F * h * F),name='n_ph'),
         pd.Series(NEP_KID,name='NEP_KID'),
         pd.Series(NEP_inst,name='NEP_inst'),
         pd.Series(NEFD_,name='NEFD'),
@@ -157,6 +159,9 @@ def deshima_sensitivity(
 def eta_atm_func(F, pwv, EL=60., R=0):
         if np.average(F) > 10.**9:
             F = F / 10.**9
+        if not hasattr(1, "__len__"): # give F a length if it is an integer.
+            F = np.asarray([F])
+
         eta_atm_df = pd.read_csv(os.path.dirname(__file__)+'/data/atm.csv',skiprows=4,delim_whitespace=True,header=0)
         eta_atm_func_zenith = eta_atm_interp(eta_atm_df)
 
