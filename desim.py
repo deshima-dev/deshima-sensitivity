@@ -148,18 +148,18 @@ def deshima_sensitivity(
 
     return result
 
-# Calculate eta_atm as a function of F
-# path https://qiita.com/ymdymd/items/d758110d429f72bc10fb
-
-# Make a function (eta_atm_func_zenith) by interpolation.
-# The function calculates the atmospheric transmission (eta_atm) from:
-# 1) PWV, 2) frequency 3) elevation.
-
 
 def eta_atm_func(F, pwv, EL=60., R=0):
+        # Calculate eta_atm as a function of F
+        # path https://qiita.com/ymdymd/items/d758110d429f72bc10fb
+
+        # Make a function (eta_atm_func_zenith) by interpolation.
+        # The function calculates the atmospheric transmission (eta_atm) from:
+        # 1) PWV, 2) frequency 3) elevation.
+
         if np.average(F) > 10.**9:
             F = F / 10.**9
-        if not hasattr(1, "__len__"): # give F a length if it is an integer.
+        if not hasattr(F, "__len__"): # give F a length if it is an integer.
             F = np.asarray([F])
 
         eta_atm_df = pd.read_csv(os.path.dirname(__file__)+'/data/atm.csv',skiprows=4,delim_whitespace=True,header=0)
