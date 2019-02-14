@@ -107,7 +107,7 @@ def deshima_sensitivity(
     # Make Pandas DataFrame out of the result
 
     result = pd.concat([
-        pd.Series(F,name='F'),　
+        pd.Series(F,name='F'),
         pd.Series(pwv,name='PWV'),
         pd.Series(EL,name='EL'),
         pd.Series(eta_atm,name='eta_atm'),
