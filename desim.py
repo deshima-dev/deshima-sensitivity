@@ -87,7 +87,7 @@ def deshima_sensitivity(
     eta_sw = eta_pol * eta_atm * eta_a * eta_forward
 
     # Photon + R(ecombination) NEP
-    P_KID = PF_KID * W_F
+    P_KID = PF_KID * W_F 
     photon_term = 2 * P_KID * (h*F + P_KID/W_F )
     r_term = 4 * Delta_Al * P_KID / eta_pb
     NEP_KID = np.sqrt(photon_term + r_term) # KID NEP
