@@ -6,9 +6,11 @@ FAQ
 -----
 Q.  Where is the factor 2 of polarization loss included ?
         A.  In eta_source_window()
-Q.  Where is the point-source coupling phase and amplitude loss due to the mismatch between the
-    beam in radiation and reception, that Shahab calculates at the lens surface?
-        A.  It is included in the main beam efficiency. 
+Q.  Where is the point-source coupling phase and amplitude loss
+    due to the mismatch between the
+    beam in radiation and reception, that Shahab calculates
+    at the lens surface?
+        A.  It is included in the main beam efficiency.
             These losses reduce the coupling to a point source,
             but the power (in transmission) couples to the sky.
 """
@@ -44,9 +46,15 @@ def spectrometer_sensitivity(
         eta_M1_spill=0.99,  # scalar or vector
         eta_M2_spill=0.90,  # scalar or vector
         eta_wo=0.99,  # scalar or vector. product of all cabin loss
-        eta_co=0.65,  # scalar or vector. product of co spillover, qo filter transmission
-        eta_lens_antenna_rad=0.81,  # scalar or vector. D2_2V3.pdf, p14: front-to-back ratio 0.93 * reflection efficiency 0.9 * matching 0.98 * antenna spillover 0.993
-        eta_circuit=0.45,  # scalar or vector. 'Alejandro Efficiency', from the feedpoint of the antenna to being absorbed in the KID.
+        # scalar or vector. product of co spillover, qo filter transmission
+        eta_co=0.65,
+        # scalar or vector. D2_2V3.pdf, p14:
+        # front-to-back ratio 0.93 * reflection efficiency 0.9
+        # * matching 0.98 * antenna spillover 0.993
+        eta_lens_antenna_rad=0.81,
+        # scalar or vector. 'Alejandro Efficiency',
+        # from the feedpoint of the antenna to being absorbed in the KID.
+        eta_circuit=0.45,
         theta_maj=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
         theta_min=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
         eta_mb=0.6,  # scalar or vector.
@@ -66,43 +74,44 @@ def spectrometer_sensitivity(
     Parameters
     ------------
     One of the parameters can be a vector of length N.
-    In this case the output of the script will be a 2D pandas.DataFrame with N rows.
+    In this case the output of the script will be a 2D pandas.DataFrame
+    with N rows.
     If all parameters are a scalar, then the output will be
     a 1D pandas DataFrame (or Series?)
 
-    F : float (for scalar), or numpy.array or pandas.Series (for vector)
+    F : scalar or vector
         Frequency of the astronomical signal.
         Unit: Hz
-    pwv : float (for scalar) or numpy.array or pandas.Series (for vector)
+    pwv : scalar or vector
         precipitable water vapour.
         Unit: mm
-    EL : float (for scalar) or numpy.array or pandas.Series (for vector)
+    EL : scalar or vector
         telescope elevation angle
         Unit: degrees
-    R : float (for scalar) or numpy.array or pandas.Series (for vector)
+    R : scalar or vector
         spectral resolving power in F/W_F
         W_F is the 'equivalent bandwidth'
             http://www.astrosurf.com/buil/us/spe2/hresol7.htm
         Unit : None.
-    eta_M1_spill : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_M1_spill : scalar or vector
         spillover efficiency at the telescope primary mirror.
         Unit: None.
-    eta_M2_spill : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_M2_spill : scalar or vector
         spillover efficiency at the telescope secondary mirror.
         Unit: None.
-    eta_wo : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_wo : scalar or vector
         Product of all losses in the warm optics in the cabin.
         This includes:
             - Spillover losses
             - Ohmic losses
         Unit: None.
-    eta_co : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_co : scalar or vector
         Product of following:
             - Cold spillover
             - Cold ohmic losses
             - Filter transmission loss
         Unit: None.
-    eta_lens_antenna_rad : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_lens_antenna_rad : scalar or vector
         The loss at chip temperature, *that is not in the circuit.*
         Product of the following:
             - Front-to-back ratio of the lens-antenna on the chip.
@@ -111,48 +120,52 @@ def spectrometer_sensitivity(
             - Spillover efficiency of the lens-antenna
         These values can be found in D2_2V3.pdf, p14
         Unit: None.
-    eta_circuit : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_circuit : scalar or vector
         The loss at chip temperature, *in the circuit.*
         Unit: None.
-    theta_maj : float (for scalar) or numpy.array or pandas.Series (for vector)
+    theta_maj : scalar or vector
         The HPBW along the major axis, assuming a Gaussian beam.
         Unit: radians.
-    theta_min : float (for scalar) or numpy.array or pandas.Series (for vector)
+    theta_min : scalar or vector
         The HPBW along the minor axis, assuming a Gaussian beam.
         Unit: radians.
-    eta_mb : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_mb : scalar or vector
         main beam efficiency.
-        Note that eta_mb includes the following terms from D2_2V3.pdf from Shahab's report.
+        Note that eta_mb includes the following terms from D2_2V3.pdf
+        from Shahab's report.
             - eta_Phi
             - eta_amp
-        Because a decrease in these will launch the beam to the sky but not couple it to the point source.
+        Because a decrease in these will launch the beam to the sky b
+        ut not couple it to the point source.
         (See also FAQ.)
         Unit: None.
     telescope_diameter : float or vector.
         diameter of the telescope.
         Units: m
-    Tb_cmb : float (for scalar) or numpy.array or pandas.Series (for vector)
+    Tb_cmb : scalar or vector
         Brightness temperature of the CMB.
         Unit: K
-    Tp_amb : float (for scalar) or numpy.array or pandas.Series (for vector)
-        Physical temperature of the atmosphere and ambient environment around the telescope.
+    Tp_amb : scalar or vector
+        Physical temperature of the atmosphere and ambient environment
+        around the telescope.
         Unit: K
-    Tp_cabin : float (for scalar) or numpy.array or pandas.Series (for vector)
+    Tp_cabin : scalar or vector
         Physical temperature of the telescope cabin.
         Unit: K
-    Tp_co : float (for scalar) or numpy.array or pandas.Series (for vector)
+    Tp_co : scalar or vector
         Physical temperature of the cold optics inside the cryostat.
         Unit: K
-    Tp_chip : float (for scalar) or numpy.array or pandas.Series (for vector)
+    Tp_chip : scalar or vector
         Physical temperature of the chip.
         Unit: K
-    snr : float (for scalar) or numpy.array or pandas.Series (for vector)
+    snr : scalar or vector
         target signal to noise to be reached. (for calculating the MDLF)
         Unit: None.
-    obs_hours :  float (for scalar) or numpy.array or pandas.Series (for vector)
-        observing hours, including off-source time and the slew overhead between on- and off-source.
+    obs_hours :  scalar or vector
+        observing hours, including off-source time and the slew
+        overhead between on- and off-source.
         Unit : hours
-    on_source_fraction : float (for scalar) or numpy.array or pandas.Series (for vector)
+    on_source_fraction : scalar or vector
         Fraction of the time on source (between 0. and 1.)
 
     Returns
@@ -175,18 +188,27 @@ def spectrometer_sensitivity(
     eta_inst : instrument optical efficiency (https://arxiv.org/abs/1901.06934)
     eta_circuit : same as input
     Tb_sky : Callen-Welton brightness temperature of the sky. Units : K
-    Tb_M1 : Callen-Weltonbrightness temperature looking into the telescope primary. Units: K
+    Tb_M1 : Callen-Weltonbrightness temperature looking
+            into the telescope primary. Units: K
     Tb_M2 :
-        Callen-Welton brightness temperature looking into the telescope secondary,
+        Callen-Welton brightness temperature looking
+        into the telescope secondary,
         including the spillover to the cold sky. Units: K
-    Tb_wo : Callen-Welton brightness temperature looking into the warm optics. Units: K
-    Tb_window : Callen-Welton brightness temperature looking into the window. Units: K
-    Tb_co : Callen-Welton brightness temperature looking into the cold optis. Units: K
-    Tb_KID : Callen-Welton brightness temperature looking into the filter _from_ the KID. Units: K
+    Tb_wo : Callen-Welton brightness temperature looking into the warm optics.
+        Units: K
+    Tb_window : Callen-Welton brightness temperature looking into the window.
+        Units: K
+    Tb_co : Callen-Welton brightness temperature looking into the cold optis.
+        Units: K
+    Tb_KID : Callen-Welton brightness temperature looking into the filter
+        _from_ the KID. Units: K
     Pkid : Power absorbed by the KID. Units: W
-    n_ph : Photon occupation number (http://adsabs.harvard.edu/abs/1999ASPC..180..671R) Units: None.
-    NEPkid : Noise equivalent power at the KID with respect to the absorbed power. Units: W Hz^0.5
-    NEPinst : Instrumnet NEP (https://arxiv.org/abs/1901.06934). Units: W Hz^0.5
+    n_ph : Photon occupation number. Units: None.
+        (http://adsabs.harvard.edu/abs/1999ASPC..180..671R)
+    NEPkid : Noise equivalent power at the KID
+        with respect to the absorbed power. Units: W Hz^0.5
+    NEPinst : Instrumnet NEP  Units: W Hz^0.5
+        (https://arxiv.org/abs/1901.06934).
     NEFD : Noise Equivalent Flux Density. Units: W/m^2/Hz * s^0.5
     NEF : Noise Equivalent Flux. Units: W/m^2 * s^0.5
     MDLF : Minimum Detectable Line Flux. Units: W/m^2
@@ -212,8 +234,9 @@ def spectrometer_sensitivity(
     eta_M1 = eta_M1_ohmic * eta_M1_spill
     eta_chip = eta_lens_antenna_rad * eta_circuit
 
-    # Forward efficiency
-    eta_forward = eta_M1*eta_M2_ohmic * eta_M2_spill * eta_wo + (1.-eta_M2_spill)*eta_wo  # does/should not include window loss
+    # Forward efficiency: does/should not include window loss
+    eta_forward = (eta_M1*eta_M2_ohmic * eta_M2_spill * eta_wo +
+                   (1.-eta_M2_spill)*eta_wo)
 
     # Equivalent Bandwidth of 1 channel, assuming Lorentzian
     # Note that this calculates the coupling to a continuum source.
@@ -236,9 +259,9 @@ def spectrometer_sensitivity(
     psd_M2_spill = rad_trans(psd_M1, psd_sky, eta_M2_spill)
     psd_M2 = rad_trans(psd_M2_spill, psd_jn_amb, eta_M2_ohmic)
     psd_wo = rad_trans(psd_M2, psd_jn_cabin, eta_wo)
-    [psd_window, eta_window] = window_trans(F, psd_wo, psd_jn_cabin,  psd_jn_co)
+    [psd_window, eta_window] = window_trans(F, psd_wo, psd_jn_cabin, psd_jn_co)
     psd_co = rad_trans(psd_window, psd_jn_co, eta_co)
-    psd_KID = rad_trans(psd_co, psd_jn_chip,  eta_chip)  # Power density _absorbed_ by the KID
+    psd_KID = rad_trans(psd_co, psd_jn_chip,  eta_chip)  # PSD absorbed by KID
 
     # Instrument optical efficiency
     eta_inst = eta_chip * eta_co * eta_window
@@ -328,7 +351,7 @@ def eta_atm_func(F, pwv, EL=60., R=0):
 
     Parameters
     ----------
-    F : float (for scalar), or numpy.array or pandas.Series (for vector)
+    F : scalar or vector
         Frequency of the astronomical signal.
         Unit: Hz (works also for GHz, will detect)
     pwv : float
@@ -368,13 +391,17 @@ def eta_atm_func(F, pwv, EL=60., R=0):
     eta_atm_func_zenith = eta_atm_interp(eta_atm_df)
 
     if R == 0:
-        eta_atm = np.abs(eta_atm_func_zenith(pwv, F)) ** (1./np.sin(EL*np.pi/180.))
+        eta_atm = np.abs(
+                eta_atm_func_zenith(pwv, F)) ** (1./np.sin(EL*np.pi/180.))
     else:  # smooth with spectrometer resolution
-        F_highres = eta_atm_df['F']  # 100.0, 100.1., ....., 1000 GHz as in the original data.
+        # 100.0, 100.1., ....., 1000 GHz as in the original data.
+        F_highres = eta_atm_df['F']
         eta_atm_zenith_highres = eta_atm_func_zenith(pwv, F_highres)
         eta_atm = np.zeros(len(F))
         for i_ch in range(len(F)):
-            eta_atm[i_ch] = np.mean(eta_atm_zenith_highres[(F_highres > F[i_ch]*(1-0.5/R)) & (F_highres < F[i_ch]*(1+0.5/R))])
+            eta_atm[i_ch] = np.mean(
+                eta_atm_zenith_highres[(F_highres > F[i_ch]*(1-0.5/R)) &
+                                       (F_highres < F[i_ch]*(1+0.5/R))])
         eta_atm = [eta_atm]
 
     if len(eta_atm) == 1:
@@ -389,7 +416,8 @@ def eta_atm_interp(eta_atm_dataframe):
     """
     Used in the function eta_atm_func().
     Returns a function that interpolates atmospheric transmission data
-    downloaded from ALMA (https://almascience.eso.org/about-alma/atmosphere-model)
+    downloaded from ALMA
+    (https://almascience.eso.org/about-alma/atmosphere-model)
     The returned function has the form of
     eta = func(F [GHz], pwv [mm]). Note telescope EL = 90 (zenith)
 
@@ -404,7 +432,8 @@ def eta_atm_interp(eta_atm_dataframe):
     Example
     --------
         % read csv file with pandas (in e.g., Jupyter)
-        eta_atm_df = pd.read_csv("<desim-folder>/data/atm.csv",skiprows=4,delim_whitespace=True,header=0)
+        eta_atm_df = pd.read_csv("<desim-folder>/data/atm.csv",skiprows=4,
+                                 delim_whitespace=True,header=0)
         % make function from pandas file
         etafun = desim.eta_atm_interp(eta_atm_df)
 
@@ -450,8 +479,8 @@ def window_trans(
         psd_co,
         thickness=8.e-3,    # in m
         tandelta=4.805e-4,  # tan delta, measured Biorad
-        tan2delta=1.e-8,  # 2.893e-8 %% tan delta, measured Biorat. I use 1e-8 as this fits the tail of the data better
-        neffHDPE=1.52,  # for window reflection calculation and loss calculation. set to 1 to remove reflections
+        tan2delta=1.e-8,
+        neffHDPE=1.52,
         ):
     """
     Calculates the window transmission.
@@ -475,6 +504,8 @@ def window_trans(
         Units: m
     tandelta, tan2delta : scalar
         values from Stephen.
+            "# 2.893e-8 %% tan delta, measured Biorat. I use 1e-8 as this fits
+            the tail of the data better"
     neffHDPE : scalar
         refractive index of HDPE. set to 1 to remove reflections.
         Units : None.
@@ -488,12 +519,15 @@ def window_trans(
 
     """
     # Parameters to calcualte the window (HDPE), data from Stephen
-    HDPErefl = ((1-neffHDPE)/(1+neffHDPE))**2   # reflection. ((1-neffHDPE)/(1+neffHDPE))^2. Set to 0 for Ar coated.
-    eta_HDPE = np.exp(-thickness*2*np.pi*neffHDPE*(tandelta*F/c + tan2delta*(F/c)**2))
-
-    psd_after_1st_refl = rad_trans(psd_in, psd_co, 1.-HDPErefl)  # most of the reflected power sees the cold.
+    # reflection. ((1-neffHDPE)/(1+neffHDPE))^2. Set to 0 for Ar coated.
+    HDPErefl = ((1-neffHDPE)/(1+neffHDPE))**2
+    eta_HDPE = np.exp(-thickness * 2 * np.pi * neffHDPE *
+                      (tandelta * F / c + tan2delta * (F / c)**2))
+    # most of the reflected power sees the cold.
+    psd_after_1st_refl = rad_trans(psd_in, psd_co, 1.-HDPErefl)
     psd_before_2nd_refl = rad_trans(psd_after_1st_refl, psd_cabin, eta_HDPE)
-    psd_after_2nd_refl = rad_trans(psd_before_2nd_refl, psd_co, 1.-HDPErefl)  # the reflected power sees the cold.
+    # the reflected power sees the cold.
+    psd_after_2nd_refl = rad_trans(psd_before_2nd_refl, psd_co, 1.-HDPErefl)
 
     eta_window = (1.-HDPErefl)**2 * eta_HDPE
 
@@ -595,7 +629,7 @@ def aperture_efficiency(
         ):
     """
     Calculates telescope aperture efficiency.
-    
+
     Parameters
     ----------
     F : scalar or vector.
@@ -607,7 +641,7 @@ def aperture_efficiency(
     theta_min : scalar or vector.
         The HPBW along the minor axis, assuming a Gaussian beam.
         Unit: radians.
-    eta_mb : float (for scalar) or numpy.array or pandas.Series (for vector)
+    eta_mb : scalar or vector
         main beam efficiency.
         Unit: None.
     telescope_diameter : float or vector.
@@ -682,7 +716,7 @@ def NEFD(
     Parameters
     ----------
     NEPinst : scalar or vector.
-        NEPinst : Instrumnet NEP (https://arxiv.org/abs/1901.06934). 
+        NEPinst : Instrumnet NEP (https://arxiv.org/abs/1901.06934).
         Units: W Hz^0.5
     eta_source_window_ : scalar or vector.
         Optical efficiency from an astronomical point source
@@ -703,7 +737,9 @@ def NEFD(
     NESP = NEPinst / eta_source_window  # noise equivalent source power
     radius = telescope_diameter / 2.
     Ag = np.pi * radius**2.  # physical diameter of the telescope
-    NEF = NESP / Ag / np.sqrt(2)  # noise equivalent flux; sqrt(2) is because NEP is defined for 0.5 s integration.
+    # noise equivalent flux;
+    # sqrt(2) is because NEP is defined for 0.5 s integration.
+    NEF = NESP / Ag / np.sqrt(2)
     W_F = 0.5*np.pi*F/R
     NEFD_ = NEF / W_F
     return NEFD_
