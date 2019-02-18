@@ -20,6 +20,7 @@ import pandas as pd
 import os
 from scipy.interpolate import interp2d
 from matplotlib.backends.backend_pdf import PdfPages
+import sys
 
 h = 6.62607004 * 10**-34  # Planck constant
 k = 1.38064852 * 10**-23  # Boltzmann constant
@@ -574,10 +575,12 @@ def T_from_psd(
         Units : K
 
     """
-    if method is 'Callen-Welton':
+    if method == 'Callen-Welton':
         T = h*F/(k*np.log(h*F/psd+1.))
     elif method is 'Rayleigh-Jeans':
         T = psd / k
+    else:
+        sys.exit("Error: Method should be Callen-Welton or Rayleigh-Jeans.")
 
     return T
 
