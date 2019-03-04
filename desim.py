@@ -1,5 +1,5 @@
 """
-DEshima SIMulator
+DEshima SIMulator.
 Module for calculating the sensitivity of a DESHIMA-type spectrometer.
 
 FAQ
@@ -54,7 +54,9 @@ def spectrometer_sensitivity(
         eta_lens_antenna_rad=0.81,
         # scalar or vector. 'Alejandro Efficiency',
         # from the feedpoint of the antenna to being absorbed in the KID.
-        eta_circuit=0.45,
+        eta_circuit=0.32,
+        eta_IBF=0.6,
+        KID_excess_noise_factor = 1.1,
         theta_maj=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
         theta_min=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
         eta_mb=0.6,  # scalar or vector.
@@ -123,6 +125,14 @@ def spectrometer_sensitivity(
     eta_circuit : scalar or vector
         The loss at chip temperature, *in the circuit.*
         Unit: None.
+    eta_IBF : in-band fraction efficiency
+        Fraction of the filter power transmission that is
+        within the filter channel bandwidth.
+        The rest of the power is cross talk,
+        picking up power that is in the bands of neighboring channels.
+        This efficiency applies to the coupling to astronomical line signals.
+        This efficiency does not apply to the coupling to continuum,
+        including the the coupling to the atmosphere for calculating the NEP.
     theta_maj : scalar or vector
         The HPBW along the major axis, assuming a Gaussian beam.
         Unit: radians.
@@ -177,7 +187,10 @@ def spectrometer_sensitivity(
     EL : same as input
     eta_atm : atmospheric transmission. Unit: None
     R : same as input
-    W_F : equivalent bandwidth of 1 channel, assuming Lorentzian. F/R. Unit: Hz
+    W_F_spec : equivalent bandwidth within the bandwidth of F/R. Units: Hz
+    W_F_cont : equivalent bandwidth of 1 channel including
+        the power coupled outside of the filter channel band.
+        Units: Hz
     theta_maj : same as input.
     theta_min : same as input.
     eta_a : aperture efficiency (https://deshima.kibe.la/notes/324)
@@ -209,7 +222,13 @@ def spectrometer_sensitivity(
         with respect to the absorbed power. Units: W Hz^0.5
     NEPinst : Instrumnet NEP  Units: W Hz^0.5
         (https://arxiv.org/abs/1901.06934).
-    NEFD : Noise Equivalent Flux Density. Units: W/m^2/Hz * s^0.5
+    NEFD_line : Noise Equivalent Flux Density for
+        couploing to a line that is not wider than the
+        filter bandwidth. Units: W/m^2/Hz * s^0.5
+    NEFD_continuum : Noise Equivalent Flux Density for
+        couploing to a countinuum source. Units: W/m^2/Hz * s^0.5
+    NEFD_ : Noise Equivalent Flux Density for
+        couploing to a countinuum source. Units: W/m^2/Hz * s^0.5
     NEF : Noise Equivalent Flux. Units: W/m^2 * s^0.5
     MDLF : Minimum Detectable Line Flux. Units: W/m^2
     snr : same as input.
@@ -238,9 +257,9 @@ def spectrometer_sensitivity(
     eta_forward = (eta_M1*eta_M2_ohmic * eta_M2_spill * eta_wo +
                    (1.-eta_M2_spill)*eta_wo)
 
-    # Equivalent Bandwidth of 1 channel, assuming Lorentzian
-    # Note that this calculates the coupling to a continuum source.
-    W_F = 0.5*np.pi*F/R
+    # Equivalent Bandwidth of 1 channel.
+    W_F_cont = F/R/eta_IBF
+    W_F_spec = F/R
 
     # Calcuate eta. scalar/vector depending on F.
     eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
@@ -278,13 +297,13 @@ def spectrometer_sensitivity(
     eta_sw = eta_pol * eta_atm * eta_a * eta_forward
 
     # Photon + R(ecombination) NEP
-    Pkid = psd_KID * W_F
-    photon_term = 2 * Pkid * (h*F + Pkid/W_F)
+    Pkid = psd_KID * W_F_cont
+    photon_term = 2 * Pkid * (h*F + Pkid/W_F_cont)
     r_term = 4 * Delta_Al * Pkid / eta_pb
-    NEPkid = np.sqrt(photon_term + r_term)  # KID NEP
+    NEPkid = np.sqrt(photon_term + r_term) * np.sqrt(KID_excess_noise_factor)  # KID NEP
     NEPinst = NEPkid / eta_inst  # Instrument NEP
 
-    NEFD_ = NEFD(
+    spectral_NEFD_ = spectral_NEFD(
             NEPinst,
             eta_source_window=eta_sw,
             F=F,
@@ -292,10 +311,12 @@ def spectrometer_sensitivity(
             telescope_diameter=10.
         )
 
-    NEF = NEFD_ * W_F
+    continuum_NEFD = spectral_NEFD_ / eta_IBF
+
+    NEF = spectral_NEFD_ * W_F_spec
     MDLF = NEF * snr / np.sqrt(obs_hours*on_source_fraction*60.*60.)
 
-    Trx = NEPinst/k/np.sqrt(2*W_F) - T_from_psd(F, psd_wo)  # This assumes RJ!
+    Trx = NEPinst/k/np.sqrt(2*W_F_cont) - T_from_psd(F, psd_wo)  # assumes RJ!
 
     # Make Pandas DataFrame out of the result
 
@@ -305,7 +326,8 @@ def spectrometer_sensitivity(
         pd.Series(EL, name='EL'),
         pd.Series(eta_atm, name='eta_atm'),
         pd.Series(R, name='R'),
-        pd.Series(W_F, name='W_F'),
+        pd.Series(W_F_spec, name='W_F_spec'),
+        pd.Series(W_F_cont, name='W_F_cont'),
         pd.Series(theta_maj, name='theta_maj'),
         pd.Series(theta_min, name='theta_min'),
         pd.Series(eta_a, name='eta_a'),
@@ -323,10 +345,11 @@ def spectrometer_sensitivity(
         pd.Series(T_from_psd(F, psd_co), name='Tb_co'),
         pd.Series(T_from_psd(F, psd_KID), name='Tb_KID'),
         pd.Series(Pkid, name='Pkid'),
-        pd.Series(Pkid/(W_F * h * F), name='n_ph'),
+        pd.Series(Pkid/(W_F_cont * h * F), name='n_ph'),
         pd.Series(NEPkid, name='NEPkid'),
         pd.Series(NEPinst, name='NEPinst'),
-        pd.Series(NEFD_, name='NEFD'),
+        pd.Series(spectral_NEFD_, name='NEFD_line'),
+        pd.Series(continuum_NEFD, name='NEFD_continuum'),
         pd.Series(NEF, name='NEF'),
         pd.Series(MDLF, name='MDLF'),
         pd.Series(snr, name='snr'),
@@ -703,7 +726,7 @@ def eta_source_window(
     return eta_source_window_
 
 
-def NEFD(
+def spectral_NEFD(
         NEPinst,
         eta_source_window,
         F=350.*10.**9.,
@@ -740,6 +763,6 @@ def NEFD(
     # noise equivalent flux;
     # sqrt(2) is because NEP is defined for 0.5 s integration.
     NEF = NESP / Ag / np.sqrt(2)
-    W_F = 0.5*np.pi*F/R
-    NEFD_ = NEF / W_F
+    W_F_spec = F/R
+    NEFD_ = NEF / W_F_spec
     return NEFD_
