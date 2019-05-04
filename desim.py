@@ -298,9 +298,7 @@ def spectrometer_sensitivity(
 
     # Photon + R(ecombination) NEP
     Pkid = psd_KID * W_F_cont
-    photon_term = 2 * Pkid * (h*F + Pkid/W_F_cont)
-    r_term = 4 * Delta_Al * Pkid / eta_pb
-    NEPkid = np.sqrt(photon_term + r_term) * np.sqrt(KID_excess_noise_factor)  # KID NEP
+    NEPkid = photon_NEP_kid(F,Pkid,W_F_cont)
     NEPinst = NEPkid / eta_inst  # Instrument NEP
 
     spectral_NEFD_ = spectral_NEFD(
@@ -724,6 +722,32 @@ def eta_source_window(
     """
     eta_source_window_ = eta_pol * eta_atm * eta_a * eta_forward
     return eta_source_window_
+
+def photon_NEP_kid(
+        F,
+        Pkid,
+        W_F
+        ):
+    """
+    NEP of the KID, with respect to the absorbed power.
+
+    Parameters
+    -----------
+    F:  Frequency of the signal responsible for loading.
+        Unit: Hz
+    Pkid: Power absorbed by the KID.
+        Unit: W
+    W_F: detection bandwidth, with respect to the power that sets the loading.
+        Unit: Hz
+    
+    Note
+    --------
+    Pkid/(W_F * h * F) gives the occupation number.
+    """
+    photon_term = 2 * Pkid * (h*F + Pkid/W_F)
+    r_term = 4 * Delta_Al * Pkid / eta_pb
+    NEPkid = np.sqrt(photon_term + r_term)
+    return NEPkid
 
 
 def spectral_NEFD(
