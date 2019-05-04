@@ -38,7 +38,7 @@ Ltir = 1.e+11
 switch_dwarf = True
 
 ## line-to-TIR luminosity ratio (L_Sun or Watt)
-Rcii_B08, Roiii_B08, Roi_B08 = 1.3e-3, 8.0e-4, 1.0e-3 ## from Brauer+2008
+Rcii_B08, Roiii_B08, Roi_B08 = 1.3e-3, 8.0e-4, 1.0e-3 ## from Brauher+2008
 Rcii_DGS, Roiii_DGS, Roi_DGS = 2.5e-3, 5.0e-3, 1.7e-3 ## from Cormier+2015
 
 ## rest frequency (GHz)
