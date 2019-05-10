@@ -68,7 +68,8 @@ def spectrometer_sensitivity(
         Tp_chip=0.12,
         snr=5.,
         obs_hours=10.,
-        on_source_fraction=0.4
+        on_source_fraction=0.4,
+        on_off = True
         ):
     """
     Calculate the sensitivity of a spectrometer.
@@ -177,6 +178,9 @@ def spectrometer_sensitivity(
         Unit : hours
     on_source_fraction : scalar or vector
         Fraction of the time on source (between 0. and 1.)
+    on_off: True or False
+        If the observation involves on_off chopping, then the SNR degrades by sqrt(2) because
+        the signal difference includes the noise twice. 
 
     Returns
     ----------
@@ -309,7 +313,10 @@ def spectrometer_sensitivity(
             telescope_diameter=10.
         )
 
-    continuum_NEFD = spectral_NEFD_ / eta_IBF
+    if on_off == True:
+        spectral_NEFD_ = np.sqrt(2) * spectral_NEFD_
+
+    continuum_NEFD = spectral_NEFD_ * eta_IBF
 
     NEF = spectral_NEFD_ * W_F_spec
     MDLF = NEF * snr / np.sqrt(obs_hours*on_source_fraction*60.*60.)
@@ -744,9 +751,11 @@ def photon_NEP_kid(
     --------
     Pkid/(W_F * h * F) gives the occupation number.
     """
-    photon_term = 2 * Pkid * (h*F + Pkid/W_F)
+    # photon_term = 2 * Pkid * (h*F + Pkid/W_F)
+    poisson_term = 2 * Pkid * h * F
+    bunching_term = 2 * Pkid * Pkid / W_F
     r_term = 4 * Delta_Al * Pkid / eta_pb
-    NEPkid = np.sqrt(photon_term + r_term)
+    NEPkid = np.sqrt(poisson_term + bunching_term + r_term)
     return NEPkid
 
 
