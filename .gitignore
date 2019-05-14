@@ -1,1 +1,4 @@
 .vscode/settings.json
+examples/D1.csv
+examples/D2baseline.csv
+examples/D2goal.csv
