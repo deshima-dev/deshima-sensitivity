@@ -46,6 +46,7 @@ def spectrometer_sensitivity(
         eta_M1_spill=0.99,  # scalar or vector
         eta_M2_spill=0.90,  # scalar or vector
         eta_wo=0.99,  # scalar or vector. product of all cabin loss
+        window_AR=True,
         # scalar or vector. product of co spillover, qo filter transmission
         eta_co=0.65,
         # scalar or vector. D2_2V3.pdf, p14:
@@ -282,8 +283,13 @@ def spectrometer_sensitivity(
     psd_M2_spill =  rad_trans(psd_M1,       psd_sky,        eta_M2_spill)
     psd_M2 =        rad_trans(psd_M2_spill, psd_jn_amb,     eta_M2_ohmic)
     psd_wo =        rad_trans(psd_M2,       psd_jn_cabin,   eta_wo      )
-    [psd_window, eta_window] = (
-                 window_trans(F, psd_wo,    psd_jn_cabin,   psd_jn_co   ))
+    if window_AR is True:
+        psd_window = psd_wo
+        eta_window = 1.
+        HDPErefl = 0.
+    else:
+        [psd_window, eta_window, HDPErefl] = (
+                    window_trans(F, psd_wo,    psd_jn_cabin,   psd_jn_co   ))
     psd_co =        rad_trans(psd_window,   psd_jn_co,      eta_co      )
     psd_KID =       rad_trans(psd_co,       psd_jn_chip,    eta_chip    )  # PSD absorbed by KID
 
@@ -291,22 +297,31 @@ def spectrometer_sensitivity(
     eta_inst = eta_chip * eta_co * eta_window
 
     # Sky loading, for reference
-    psd_KID_sky = psd_sky * eta_M1 * eta_M2_spill * eta_M2_ohmic * eta_inst
+    psd_KID_sky_1 = psd_sky * eta_M1 * eta_M2_spill * eta_M2_ohmic * eta_wo * eta_inst
+    psd_KID_sky_2 = rad_trans(0, psd_sky, eta_M2_spill) * eta_M2_ohmic * eta_wo * eta_inst
+    psd_KID_sky = psd_KID_sky_1 + psd_KID_sky_2
 
     # Warm loading, for reference
-    psd_KID_warm =  window_trans(F,
+
+    psd_KID_warm =  rad_trans(
                         rad_trans(
                             rad_trans(
-                                rad_trans(
-                                    rad_trans(0, psd_jn_amb, eta_M1),
-                                psd_sky, eta_M2_spill),
-                            psd_jn_amb, eta_M2_ohmic),
-                        psd_jn_cabin,   eta_wo),
-                    psd_jn_cabin,psd_jn_co)[0] * eta_co * eta_chip
+                                rad_trans(0, psd_jn_amb, eta_M1),
+                            0, eta_M2_spill), # sky spillover does not count for warm loading
+                        psd_jn_amb, eta_M2_ohmic),
+                    psd_jn_cabin, eta_wo)
+
+    if window_AR is True:
+        psd_KID_warm = psd_KID_warm * eta_chip * eta_co
+    else:
+        psd_KID_warm =  window_trans(F,psd_KID_warm, psd_jn_cabin, psd_jn_co)[0] * eta_co * eta_chip
 
     # Cold loading, for reference
     psd_KID_cold =  rad_trans(
-                        rad_trans(0, psd_jn_co, eta_co),
+                        rad_trans(
+                            # rad_trans(0,psd_jn_co,HDPErefl),
+                            0,
+                        psd_jn_co, eta_co),
                     psd_jn_chip, eta_chip)
 
     # Photon + R(ecombination) NEP
@@ -374,6 +389,9 @@ def spectrometer_sensitivity(
         pd.Series(T_from_psd(F, psd_co), name='Tb_co'),
         pd.Series(T_from_psd(F, psd_KID), name='Tb_KID'),
         pd.Series(Pkid, name='Pkid'),
+        pd.Series(Pkid_sky, name='Pkid_sky'),
+        pd.Series(Pkid_warm, name='Pkid_warm'),
+        pd.Series(Pkid_cold, name='Pkid_cold'),
         pd.Series(Pkid/(W_F_cont * h * F), name='n_ph'),
         pd.Series(NEPkid, name='NEPkid'),
         pd.Series(NEPinst, name='NEPinst'),
@@ -583,7 +601,7 @@ def window_trans(
 
     eta_window = (1.-HDPErefl)**2 * eta_HDPE
 
-    return psd_after_2nd_refl, eta_window
+    return psd_after_2nd_refl, eta_window, HDPErefl
 
 
 def nph(F, T):
