@@ -277,17 +277,46 @@ def spectrometer_sensitivity(
     psd_jn_chip = johnson_nyquist_psd(F=F, T=Tp_chip)
 
     # Power density (W/Hz) at different stages
-    psd_sky = rad_trans(psd_jn_cmb, psd_jn_amb, eta_atm)
-    psd_M1 = rad_trans(psd_sky, psd_jn_amb, eta_M1)
-    psd_M2_spill = rad_trans(psd_M1, psd_sky, eta_M2_spill)
-    psd_M2 = rad_trans(psd_M2_spill, psd_jn_amb, eta_M2_ohmic)
-    psd_wo = rad_trans(psd_M2, psd_jn_cabin, eta_wo)
-    [psd_window, eta_window] = window_trans(F, psd_wo, psd_jn_cabin, psd_jn_co)
-    psd_co = rad_trans(psd_window, psd_jn_co, eta_co)
-    psd_KID = rad_trans(psd_co, psd_jn_chip,  eta_chip)  # PSD absorbed by KID
+    psd_sky =       rad_trans(psd_jn_cmb,   psd_jn_amb,     eta_atm     )
+    psd_M1  =       rad_trans(psd_sky,      psd_jn_amb,     eta_M1      )
+    psd_M2_spill =  rad_trans(psd_M1,       psd_sky,        eta_M2_spill)
+    psd_M2 =        rad_trans(psd_M2_spill, psd_jn_amb,     eta_M2_ohmic)
+    psd_wo =        rad_trans(psd_M2,       psd_jn_cabin,   eta_wo      )
+    [psd_window, eta_window] = (
+                 window_trans(F, psd_wo,    psd_jn_cabin,   psd_jn_co   ))
+    psd_co =        rad_trans(psd_window,   psd_jn_co,      eta_co      )
+    psd_KID =       rad_trans(psd_co,       psd_jn_chip,    eta_chip    )  # PSD absorbed by KID
 
     # Instrument optical efficiency
     eta_inst = eta_chip * eta_co * eta_window
+
+    # Sky loading, for reference
+    psd_KID_sky = psd_sky * eta_M1 * eta_M2_spill * eta_M2_ohmic * eta_inst
+
+    # Warm loading, for reference
+    psd_KID_warm =  window_trans(F,
+                        rad_trans(
+                            rad_trans(
+                                rad_trans(
+                                    rad_trans(0, psd_jn_amb, eta_M1),
+                                psd_sky, eta_M2_spill),
+                            psd_jn_amb, eta_M2_ohmic),
+                        psd_jn_cabin,   eta_wo),
+                    psd_jn_cabin,psd_jn_co)[0] * eta_co * eta_chip
+
+    # Cold loading, for reference
+    psd_KID_cold =  rad_trans(
+                        rad_trans(0, psd_jn_co, eta_co),
+                    psd_jn_chip, eta_chip)
+
+    # Photon + R(ecombination) NEP
+    Pkid = psd_KID * W_F_cont
+    Pkid_sky = psd_KID_sky * W_F_cont
+    Pkid_warm = psd_KID_warm * W_F_cont
+    Pkid_cold = psd_KID_cold * W_F_cont
+
+    NEPkid = photon_NEP_kid(F,Pkid,W_F_cont)
+    NEPinst = NEPkid / eta_inst  # Instrument NEP
 
     eta_a = aperture_efficiency(
         F=F,
@@ -299,11 +328,6 @@ def spectrometer_sensitivity(
 
     eta_pol = 0.5
     eta_sw = eta_pol * eta_atm * eta_a * eta_forward
-
-    # Photon + R(ecombination) NEP
-    Pkid = psd_KID * W_F_cont
-    NEPkid = photon_NEP_kid(F,Pkid,W_F_cont)
-    NEPinst = NEPkid / eta_inst  # Instrument NEP
 
     spectral_NEFD_ = spectral_NEFD(
             NEPinst,
