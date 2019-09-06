@@ -353,6 +353,7 @@ def spectrometer_sensitivity(
 
     Trx = NEPinst/k/np.sqrt(2*W_F_cont) - T_from_psd(F, psd_wo)  # assumes RJ!
 
+
     # Make Pandas DataFrame out of the result
 
     result = pd.concat([
