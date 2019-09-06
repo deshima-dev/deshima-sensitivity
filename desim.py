@@ -46,7 +46,7 @@ def spectrometer_sensitivity(
         eta_M1_spill=0.99,  # scalar or vector
         eta_M2_spill=0.90,  # scalar or vector
         eta_wo=0.99,  # scalar or vector. product of all cabin loss
-        window_AR=True,
+        window_AR=False,
         # scalar or vector. product of co spillover, qo filter transmission
         eta_co=0.65,
         # scalar or vector. D2_2V3.pdf, p14:
@@ -283,13 +283,8 @@ def spectrometer_sensitivity(
     psd_M2_spill =  rad_trans(psd_M1,       psd_sky,        eta_M2_spill)
     psd_M2 =        rad_trans(psd_M2_spill, psd_jn_amb,     eta_M2_ohmic)
     psd_wo =        rad_trans(psd_M2,       psd_jn_cabin,   eta_wo      )
-    if window_AR is True:
-        psd_window = psd_wo
-        eta_window = 1.
-        HDPErefl = 0.
-    else:
-        [psd_window, eta_window, HDPErefl] = (
-                    window_trans(F, psd_wo,    psd_jn_cabin,   psd_jn_co   ))
+    [psd_window, eta_window] = (
+                    window_trans(F=F, psd_in=psd_wo, psd_cabin=psd_jn_cabin, psd_co=psd_jn_co, window_AR=window_AR))
     psd_co =        rad_trans(psd_window,   psd_jn_co,      eta_co      )
     psd_KID =       rad_trans(psd_co,       psd_jn_chip,    eta_chip    )  # PSD absorbed by KID
 
@@ -303,24 +298,20 @@ def spectrometer_sensitivity(
 
     # Warm loading, for reference
 
-    psd_KID_warm =  rad_trans(
+    psd_KID_warm =  window_trans(F=F,psd_in=
                         rad_trans(
                             rad_trans(
-                                rad_trans(0, psd_jn_amb, eta_M1),
-                            0, eta_M2_spill), # sky spillover does not count for warm loading
-                        psd_jn_amb, eta_M2_ohmic),
-                    psd_jn_cabin, eta_wo)
-
-    if window_AR is True:
-        psd_KID_warm = psd_KID_warm * eta_chip * eta_co
-    else:
-        psd_KID_warm =  window_trans(F,psd_KID_warm, psd_jn_cabin, psd_jn_co)[0] * eta_co * eta_chip
+                                rad_trans(
+                                    rad_trans(0, psd_jn_amb, eta_M1),
+                                0, eta_M2_spill), # sky spillover does not count for warm loading
+                            psd_jn_amb, eta_M2_ohmic),
+                        psd_jn_cabin, eta_wo),
+                    psd_cabin=psd_jn_cabin, psd_co=0, window_AR=window_AR)[0] * eta_co * eta_chip
 
     # Cold loading, for reference
     psd_KID_cold =  rad_trans(
                         rad_trans(
-                            # rad_trans(0,psd_jn_co,HDPErefl),
-                            0,
+                            window_trans(F=F, psd_in=0., psd_cabin=0., psd_co=psd_jn_co, window_AR=window_AR)[0],
                         psd_jn_co, eta_co),
                     psd_jn_chip, eta_chip)
 
@@ -551,6 +542,7 @@ def window_trans(
         tandelta=4.805e-4,  # tan delta, measured Biorad
         tan2delta=1.e-8,
         neffHDPE=1.52,
+        window_AR = False
         ):
     """
     Calculates the window transmission.
@@ -590,7 +582,12 @@ def window_trans(
     """
     # Parameters to calcualte the window (HDPE), data from Stephen
     # reflection. ((1-neffHDPE)/(1+neffHDPE))^2. Set to 0 for Ar coated.
-    HDPErefl = ((1-neffHDPE)/(1+neffHDPE))**2
+
+    if window_AR is True:
+        HDPErefl = 0.
+    else:
+        HDPErefl = ((1-neffHDPE)/(1+neffHDPE))**2
+
     eta_HDPE = np.exp(-thickness * 2 * np.pi * neffHDPE *
                       (tandelta * F / c + tan2delta * (F / c)**2))
     # most of the reflected power sees the cold.
@@ -601,7 +598,7 @@ def window_trans(
 
     eta_window = (1.-HDPErefl)**2 * eta_HDPE
 
-    return psd_after_2nd_refl, eta_window, HDPErefl
+    return psd_after_2nd_refl, eta_window
 
 
 def nph(F, T):
