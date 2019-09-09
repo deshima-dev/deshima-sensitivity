@@ -4,8 +4,6 @@ Module for calculating the sensitivity of a DESHIMA-type spectrometer.
 
 FAQ
 -----
-Q.  Where is the factor 2 of polarization loss included ?
-        A.  In eta_source_window()
 Q.  Where is the point-source coupling phase and amplitude loss
     due to the mismatch between the
     beam in radiation and reception, that Shahab calculates
@@ -24,6 +22,8 @@ import os
 from scipy.interpolate import interp2d
 from matplotlib.backends.backend_pdf import PdfPages
 import sys
+from IPython.display import HTML
+import base64
 
 h = 6.62607004 * 10**-34  # Planck constant
 k = 1.38064852 * 10**-23  # Boltzmann constant
@@ -55,7 +55,7 @@ def spectrometer_sensitivity(
         eta_lens_antenna_rad=0.81,
         # scalar or vector. 'Alejandro Efficiency',
         # from the feedpoint of the antenna to being absorbed in the KID.
-        eta_circuit=0.32,
+        eta_circuit=0.35,
         eta_IBF=0.6,
         KID_excess_noise_factor = 1.1,
         theta_maj=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
@@ -297,7 +297,6 @@ def spectrometer_sensitivity(
     psd_KID_sky = psd_KID_sky_1 + psd_KID_sky_2
 
     # Warm loading, for reference
-
     psd_KID_warm =  window_trans(F=F,psd_in=
                         rad_trans(
                             rad_trans(
@@ -733,42 +732,42 @@ def aperture_efficiency(
     return eta_a
 
 
-def eta_source_window(
-        eta_a=0.171,
-        eta_pol=0.5,
-        eta_atm=0.9,
-        eta_forward=0.94
-        ):
-    """
-    Optical efficiency from an astronomical point source
-    to the cryostat window.
-    Factor 2 loss in polarization is included here.
+# def eta_source_window(
+#         eta_a=0.171,
+#         eta_pol=0.5,
+#         eta_atm=0.9,
+#         eta_forward=0.94
+#         ):
+#     """
+#     Optical efficiency from an astronomical point source
+#     to the cryostat window.
+#     Factor 2 loss in polarization is included here.
 
-    Parameters
-    ----------
-    eta_a : scalar or vector
-        aperture efficiency
-        Units: None.
-    eta_pol : polarization efficiency. 0.5 for a 1-polarization system.
-    eta_atm : scalar or vector.
-        atmospheric trnasmission.
-        Units: None.
-    eta_forward : scalar or vector.
-        Forward efficiency.
-        Fraction of power seen by the instrument that points
-        to the sky with respect to the warm environment.
-        https://deshima.kibe.la/notes/324
-        Units : None.
+#     Parameters
+#     ----------
+#     eta_a : scalar or vector
+#         aperture efficiency
+#         Units: None.
+#     eta_pol : polarization efficiency. 0.5 for a 1-polarization system.
+#     eta_atm : scalar or vector.
+#         atmospheric trnasmission.
+#         Units: None.
+#     eta_forward : scalar or vector.
+#         Forward efficiency.
+#         Fraction of power seen by the instrument that points
+#         to the sky with respect to the warm environment.
+#         https://deshima.kibe.la/notes/324
+#         Units : None.
 
-    Returns
-    -------
-    eta_source_window_ : scalar or vector.
-        Optical efficiency from an astronomical point source
-        to the cryostat window.
-        Units : None.
-    """
-    eta_source_window_ = eta_pol * eta_atm * eta_a * eta_forward
-    return eta_source_window_
+#     Returns
+#     -------
+#     eta_source_window_ : scalar or vector.
+#         Optical efficiency from an astronomical point source
+#         to the cryostat window.
+#         Units : None.
+#     """
+#     eta_source_window_ = eta_pol * eta_atm * eta_a * eta_forward
+#     return eta_source_window_
 
 def photon_NEP_kid(
         F,
@@ -839,3 +838,100 @@ def spectral_NEFD(
     W_F_spec = F/R
     NEFD_ = NEF / W_F_spec
     return NEFD_
+
+def deshima_sensitivity_simple(
+        pwv = 0.5, # Precipitable Water Vapor in mm
+        EL = 60., # Elevation angle in degrees
+        snr = 5., # Target S/N of the detection
+        obs_hours = 8. # Total hours of observation, including ON-OFF and calibration overhead
+        ):
+
+    
+    Fmin = 220
+    Fmax = 440
+    
+    F = np.linspace(Fmin, Fmax, (Fmax - Fmin)*10 + 1)*1e9 
+        
+    # Main beam efficiency of ASTE
+    eta_mb = eta_mb_ruze(F=F,LFlimit=0.8,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
+    
+    D2goal_input ={
+        'F' : F, # Frequency in GHz
+        'pwv':pwv, # Precipitable Water Vapor in mm
+        'EL':EL, # Elevation angle in degrees
+        'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
+        'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
+        'eta_mb' : eta_mb, # Main beam efficiency
+        'snr' : snr, # Target S/N of the detection
+        'obs_hours' :obs_hours, # Total hours of observation, including ON-OFF and calibration overhead
+        'on_source_fraction':0.4*0.9 # ON-OFF 40%, calibration overhead of 10%
+    }
+
+    D2goal = spectrometer_sensitivity(**D2goal_input)
+    
+    D2baseline_input = {
+        'F' : F,
+        'pwv':0.5,
+        'EL':60.,
+        'eta_circuit' : 0.35 * 0.5, # <= eta_inst Goal 16%, Baseline 8% 
+        'eta_IBF' : 0.4, # <= Goal 0.6 
+        'KID_excess_noise_factor' : 1.2, # Goal 1.1
+        'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
+        'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
+        'eta_mb' : eta_mb,
+        'snr' : 5,
+        'obs_hours' :8.,
+        'on_source_fraction':0.3*0.8/1.2 # <= Goal 0.4*0.9/1.1
+    }
+    
+    D2baseline = spectrometer_sensitivity(**D2baseline_input)
+            
+    ### Plot-------------------
+    
+    fig, ax = plt.subplots(1,1,figsize=(12,6))
+    ax.plot(D2baseline['F']/1e9,D2baseline['MDLF'],'--',linewidth=1,color='b',alpha=1,label='Baseline')
+    ax.plot(D2goal['F']/1e9,D2goal['MDLF'],linewidth=1,color='b',alpha=1,label='Goal')
+    ax.fill_between(D2baseline['F']/1e9,D2baseline['MDLF'],D2goal['MDLF'],color='b',alpha=0.2)
+    
+    ax.set_xlabel("Frequency (GHz)")
+    ax.set_ylabel("Minimum Detectable Line Flux ($\mathrm{W\ m^{-2}}$)")
+    ax.set_yscale('log')
+    ax.set_xlim(Fmin-20,Fmax+20)
+    ax.set_ylim([10**-20,10**-17])
+    ax.tick_params(direction='in',which='both')
+    ax.grid(True)
+    ax.set_title("$R="+str(int(D2goal['R'][0]))+", snr=" + str(D2goal['snr'][0]) + ',\ t_\mathrm{obs}=' 
+                 +str(D2goal['obs_hours'][0])
+                 +'\mathrm{h}$ PWV=' + str(D2goal['PWV'][0]) + "mm, EL="+str(int(D2goal['EL'][0]))+'deg',
+                 fontsize=12)
+    ax.legend()
+    plt.tight_layout()
+
+    # Create download link
+    #................................
+
+    df_download = D2goal[['F','MDLF']]
+    df_download = df_download.rename(columns={'MDLF':'MDLF (goal)'})
+    df_download = df_download.join(D2baseline[['MDLF']])
+    df_download = df_download.rename(columns={'MDLF':'MDLF (baseline)'})
+
+    return create_download_link(df_download,filename='MDLF.csv')
+    
+def D2HPBW(F):
+    HPBW = 29.*240./(F/1e9) * np.pi / 180. / 60. / 60.
+    return HPBW
+
+def eta_mb_ruze(F, LFlimit, sigma):
+    '''F in Hz, LFlimit is the eta_mb at => 0 Hz, sigma in m'''
+    c = 299792458.
+    eta_mb = LFlimit* np.exp(- (4.*np.pi* sigma * F/c)**2. )
+    return eta_mb
+
+
+def create_download_link(df, title = "Download CSV file", filename = "data.csv"):  
+    csv = df.to_csv(index =False)
+    b64 = base64.b64encode(csv.encode())
+    payload = b64.decode()
+    html = '<a download="{filename}" href="data:text/csv;base64,{payload}" target="_blank">{title}</a>'
+    html = html.format(payload=payload,title=title,filename=filename)
+    return HTML(html)
