@@ -871,16 +871,16 @@ def deshima_sensitivity_simple(
     
     D2baseline_input = {
         'F' : F,
-        'pwv':0.5,
-        'EL':60.,
+        'pwv':pwv,
+        'EL':EL.,
         'eta_circuit' : 0.35 * 0.5, # <= eta_inst Goal 16%, Baseline 8% 
         'eta_IBF' : 0.4, # <= Goal 0.6 
         'KID_excess_noise_factor' : 1.2, # Goal 1.1
         'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
         'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
         'eta_mb' : eta_mb,
-        'snr' : 5,
-        'obs_hours' :8.,
+        'snr' : snr,
+        'obs_hours' :obs_hours,
         'on_source_fraction':0.3*0.8/1.2 # <= Goal 0.4*0.9/1.1
     }
     
