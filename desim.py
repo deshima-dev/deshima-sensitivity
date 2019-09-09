@@ -872,7 +872,7 @@ def deshima_sensitivity_simple(
     D2baseline_input = {
         'F' : F,
         'pwv':pwv,
-        'EL':EL.,
+        'EL':EL,
         'eta_circuit' : 0.35 * 0.5, # <= eta_inst Goal 16%, Baseline 8% 
         'eta_IBF' : 0.4, # <= Goal 0.6 
         'KID_excess_noise_factor' : 1.2, # Goal 1.1
