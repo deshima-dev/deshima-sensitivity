@@ -15,13 +15,12 @@ Q.  Where is the point-source coupling phase and amplitude loss
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import integrate
-import copy
 import pandas as pd
-import os
 from scipy.interpolate import interp2d
-from matplotlib.backends.backend_pdf import PdfPages
+import copy
+import os
 import sys
+from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import HTML
 import base64
 
@@ -29,14 +28,9 @@ h = 6.62607004 * 10**-34  # Planck constant
 k = 1.38064852 * 10**-23  # Boltzmann constant
 e = 1.60217662 * 10**-19  # electron charge
 c = 299792458.  # velocity of light
-Delta_Al = 188 * 10**-6 * e  # gap energy of Al
+Delta_Al = 188. * 10**-6 * e  # gap energy of Al
 eta_pb = 0.4  # Pair breaking efficiency
-
-# Ohmic loss of an Al surface.
-# Shitov et al., ISSTT2008
-# https://www.nrao.edu/meetings/isstt/papers/2008/2008263266.pdf
-Al_refl_ohmic_loss = 0.9975
-
+eta_Al_ohmic_850 = 0.9975 # Ohmic loss of an Al surface at 850 GHz. Shitov et al., ISSTT2008. https://www.nrao.edu/meetings/isstt/papers/2008/2008263266.pdf
 
 def spectrometer_sensitivity(
         F=350.*10.**9.,  # Hz, scalar or vector
@@ -45,8 +39,9 @@ def spectrometer_sensitivity(
         R=500,  # scalar. R = Q = F/FWHM = F/dF is assumed.
         eta_M1_spill=0.99,  # scalar or vector
         eta_M2_spill=0.90,  # scalar or vector
-        eta_wo=0.99,  # scalar or vector. product of all cabin loss
-        window_AR=False,
+        eta_wo_spill=0.99,  # scalar or vector. product of cabin spillover loss
+        n_wo_mirrors = 4., # number of cabin optics, excluing telescope M1 and M2
+        window_AR=True,
         # scalar or vector. product of co spillover, qo filter transmission
         eta_co=0.65,
         # scalar or vector. D2_2V3.pdf, p14:
@@ -103,11 +98,8 @@ def spectrometer_sensitivity(
     eta_M2_spill : scalar or vector
         spillover efficiency at the telescope secondary mirror.
         Unit: None.
-    eta_wo : scalar or vector
-        Product of all losses in the warm optics in the cabin.
-        This includes:
-            - Spillover losses
-            - Ohmic losses
+    eta_wo_spill : scalar or vector
+        Product of all spillover losses in the warm optics in the cabin.
         Unit: None.
     eta_co : scalar or vector
         Product of following:
@@ -205,20 +197,20 @@ def spectrometer_sensitivity(
     eta_window : transmission of the cryostat window
     eta_inst : instrument optical efficiency (https://arxiv.org/abs/1901.06934)
     eta_circuit : same as input
-    Tb_sky : Callen-Welton brightness temperature of the sky. Units : K
-    Tb_M1 : Callen-Weltonbrightness temperature looking
+    Tb_sky : Planck brightness temperature of the sky. Units : K
+    Tb_M1 : Planckbrightness temperature looking
             into the telescope primary. Units: K
     Tb_M2 :
-        Callen-Welton brightness temperature looking
+        Planck brightness temperature looking
         into the telescope secondary,
         including the spillover to the cold sky. Units: K
-    Tb_wo : Callen-Welton brightness temperature looking into the warm optics.
+    Tb_wo : Planck brightness temperature looking into the warm optics.
         Units: K
-    Tb_window : Callen-Welton brightness temperature looking into the window.
+    Tb_window : Planck brightness temperature looking into the window.
         Units: K
-    Tb_co : Callen-Welton brightness temperature looking into the cold optis.
+    Tb_co : Planck brightness temperature looking into the cold optis.
         Units: K
-    Tb_KID : Callen-Welton brightness temperature looking into the filter
+    Tb_KID : Planck brightness temperature looking into the filter
         _from_ the KID. Units: K
     Pkid : Power absorbed by the KID. Units: W
     n_ph : Photon occupation number. Units: None.
@@ -251,52 +243,74 @@ def spectrometer_sensitivity(
 
     """
 
-    eta_M1_ohmic = Al_refl_ohmic_loss
-    eta_M2_ohmic = Al_refl_ohmic_loss
+    # Equivalent Bandwidth of 1 channel.
+    W_F_cont = F/R/eta_IBF # Used for calculating loading and coupling to a continuum source
+    W_F_spec = F/R # Used for calculating coupling to a line source, with a linewidth not wider than the filter channel
 
+    # #############################################################
+    # 1. Calculating loading power absorbed by the KID, and the NEP
+    # #############################################################
+
+    # .......................................................
+    # Efficiencies for calculating sky coupling
+    # .......................................................
+
+    # Ohmic loss as a function of frequency, from skin effect scaling
+    eta_Al_ohmic = (1.-(1.-eta_Al_ohmic_850)*np.sqrt(F/850.e9))
+    eta_M1_ohmic = eta_Al_ohmic
+    eta_M2_ohmic = eta_Al_ohmic
+    
     # Collect efficiencies at the same temperature
     eta_M1 = eta_M1_ohmic * eta_M1_spill
+    eta_wo = eta_Al_ohmic**n_wo_mirrors * eta_wo_spill
     eta_chip = eta_lens_antenna_rad * eta_circuit
 
     # Forward efficiency: does/should not include window loss
-    eta_forward = (eta_M1*eta_M2_ohmic * eta_M2_spill * eta_wo +
-                   (1.-eta_M2_spill)*eta_wo)
-
-    # Equivalent Bandwidth of 1 channel.
-    W_F_cont = F/R/eta_IBF
-    W_F_spec = F/R
-
+    # because it is defined as how much power out of the crystat window couples to the cold sky.
+    eta_forward = (eta_M1 * eta_M2_ohmic * eta_M2_spill * eta_wo +
+                    (1.-eta_M2_spill) * eta_wo)
+    
     # Calcuate eta. scalar/vector depending on F.
     eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
 
-    # Calculate the intrinsic Johnson-Nyquist power
-    # for all physical temperatures
-    psd_jn_cmb = johnson_nyquist_psd(F=F, T=Tb_cmb)
-    psd_jn_amb = johnson_nyquist_psd(F=F, T=Tp_amb)
-    psd_jn_cabin = johnson_nyquist_psd(F=F, T=Tp_cabin)
-    psd_jn_co = johnson_nyquist_psd(F=F, T=Tp_co)
-    psd_jn_chip = johnson_nyquist_psd(F=F, T=Tp_chip)
+    # Johnson-Nyquist Power Spectral Density (W/Hz) for the physical temperatures of each stage
 
-    # Power density (W/Hz) at different stages
-    psd_sky =       rad_trans(psd_jn_cmb,   psd_jn_amb,     eta_atm     )
-    psd_M1  =       rad_trans(psd_sky,      psd_jn_amb,     eta_M1      )
-    psd_M2_spill =  rad_trans(psd_M1,       psd_sky,        eta_M2_spill)
-    psd_M2 =        rad_trans(psd_M2_spill, psd_jn_amb,     eta_M2_ohmic)
-    psd_wo =        rad_trans(psd_M2,       psd_jn_cabin,   eta_wo      )
+    psd_jn_cmb   = johnson_nyquist_psd(F=F, T=Tb_cmb)
+    psd_jn_amb   = johnson_nyquist_psd(F=F, T=Tp_amb)
+    psd_jn_cabin = johnson_nyquist_psd(F=F, T=Tp_cabin)
+    psd_jn_co    = johnson_nyquist_psd(F=F, T=Tp_co)
+    psd_jn_chip  = johnson_nyquist_psd(F=F, T=Tp_chip)
+
+    # Optical Chain
+    # Sequentially calculate the Power Spectral Density (W/Hz) at each stage.
+    # Uses only basic radiation transfer: rad_out = eta*rad_in + (1-eta)*medium
+
+    psd_sky =       rad_trans(rad_in=psd_jn_cmb,   medium=psd_jn_amb,     eta=eta_atm     )
+    psd_M1  =       rad_trans(rad_in=psd_sky,      medium=psd_jn_amb,     eta=eta_M1      )
+    psd_M2_spill =  rad_trans(rad_in=psd_M1,       medium=psd_sky,        eta=eta_M2_spill) # Note that the spillover of M2 is to the
+    psd_M2 =        rad_trans(rad_in=psd_M2_spill, medium=psd_jn_amb,     eta=eta_M2_ohmic)
+    psd_wo =        rad_trans(rad_in=psd_M2,       medium=psd_jn_cabin,   eta=eta_wo      )
     [psd_window, eta_window] = (
                     window_trans(F=F, psd_in=psd_wo, psd_cabin=psd_jn_cabin, psd_co=psd_jn_co, window_AR=window_AR))
-    psd_co =        rad_trans(psd_window,   psd_jn_co,      eta_co      )
-    psd_KID =       rad_trans(psd_co,       psd_jn_chip,    eta_chip    )  # PSD absorbed by KID
+    psd_co =        rad_trans(rad_in=psd_window,   medium=psd_jn_co,      eta=eta_co      )
+    psd_KID =       rad_trans(rad_in=psd_co,       medium=psd_jn_chip,    eta=eta_chip    )  # PSD absorbed by KID
 
-    # Instrument optical efficiency
-    eta_inst = eta_chip * eta_co * eta_window
+    # Instrument optical efficiency as in JATIS 2019
+    # (eta_inst can be calculated only after calculating eta_window)
+    eta_inst = eta_chip * eta_co * eta_window 
 
-    # Sky loading, for reference
+    # Calculating Sky loading, Warm loading and Cold loading individually for reference
+    # (Not required for calculating Pkid, but serves as a consistency check.)
+    # .................................................................................
+
+    # Sky loading
     psd_KID_sky_1 = psd_sky * eta_M1 * eta_M2_spill * eta_M2_ohmic * eta_wo * eta_inst
     psd_KID_sky_2 = rad_trans(0, psd_sky, eta_M2_spill) * eta_M2_ohmic * eta_wo * eta_inst
     psd_KID_sky = psd_KID_sky_1 + psd_KID_sky_2
 
-    # Warm loading, for reference
+    skycoup = psd_KID_sky / psd_sky # To compare with Jochem
+
+    # Warm loading
     psd_KID_warm =  window_trans(F=F,psd_in=
                         rad_trans(
                             rad_trans(
@@ -307,53 +321,92 @@ def spectrometer_sensitivity(
                         psd_jn_cabin, eta_wo),
                     psd_cabin=psd_jn_cabin, psd_co=0, window_AR=window_AR)[0] * eta_co * eta_chip
 
-    # Cold loading, for reference
+    # Cold loading
     psd_KID_cold =  rad_trans(
                         rad_trans(
                             window_trans(F=F, psd_in=0., psd_cabin=0., psd_co=psd_jn_co, window_AR=window_AR)[0],
                         psd_jn_co, eta_co),
                     psd_jn_chip, eta_chip)
 
-    # Photon + R(ecombination) NEP
+    # Loadig power absorbed by the KID
+    # .............................................
+    
     Pkid = psd_KID * W_F_cont
     Pkid_sky = psd_KID_sky * W_F_cont
     Pkid_warm = psd_KID_warm * W_F_cont
     Pkid_cold = psd_KID_cold * W_F_cont
 
+    if np.all(Pkid != Pkid_sky + Pkid_warm + Pkid_cold):
+        print("WARNING: Pkid != Pkid_sky + Pkid_warm + Pkid_cold")
+
+    # Photon + R(ecombination) NEP of the KID
+    # .............................................
+
     NEPkid = photon_NEP_kid(F,Pkid,W_F_cont)
+
+    # Instrument NEP as in JATIS 2019
+    # .............................................
+
     NEPinst = NEPkid / eta_inst  # Instrument NEP
 
-    eta_a = aperture_efficiency(
-        F=F,
-        theta_maj=theta_maj,
-        theta_min=theta_min,
-        eta_mb=eta_mb,
-        telescope_diameter=telescope_diameter
-        )
+    # ##############################################################
+    # 2. Calculating source coupling and sensitivtiy (MDLF and NEFD)
+    # ##############################################################
 
-    eta_pol = 0.5
-    eta_sw = eta_pol * eta_atm * eta_a * eta_forward
+    # Efficiencies
+    # .........................................................
 
-    spectral_NEFD_ = spectral_NEFD(
-            NEPinst,
-            eta_source_window=eta_sw,
-            F=F,
-            R=R,
-            telescope_diameter=10.
-        )
+    Ag = np.pi * (telescope_diameter/2.)**2.  # Geometric area of the telescope
+    omega_mb = np.pi * theta_maj * theta_min / np.log(2) / 4 # Main beam solid angle
+    omega_a = omega_mb / eta_mb # beam solid angle
+    Ae = (c/F)**2 / omega_a # Effective Aperture (m^2): lambda^2 / omega_a
+    eta_a = Ae/Ag # Aperture efficiency
+
+    # Coupling from the "S"ource to outside of "W"indow
+    eta_pol = 0.5 # Instrument is single polarization
+    eta_sw = eta_pol * eta_atm * eta_a * eta_forward # Source-Window coupling
+
+    # NESP: Noise Equivalent Source Power (an intermediate quantitiy)
+    # ......................................................... 
+
+    NESP = NEPinst / eta_sw # Noise equivalnet source power 
+
+    # NEF: Noise Equivalent Flux (an intermediate quantitiy)
+    # ......................................................... 
+
+    # From this point, units change from Hz^-0.5 to t^0.5
+    # sqrt(2) is because NEP is defined for 0.5 s integration.
+
+    NEF = NESP / Ag / np.sqrt(2) # Noise equivalent flux
+
+    # If the observation is involves ON-OFF sky subtraction,
+    # Subtraction of two noisy sources results in sqrt(2) increase in noise.
 
     if on_off == True:
-        spectral_NEFD_ = np.sqrt(2) * spectral_NEFD_
+        NEF = np.sqrt(2) * NEF
 
-    continuum_NEFD = spectral_NEFD_ * eta_IBF
+    # MDLF (Minimum Detectable Line Flux)
+    # ......................................................... 
+ 
+    # Note that eta_IBF does not matter for MDLF because it is flux.
 
-    NEF = spectral_NEFD_ * W_F_spec
     MDLF = NEF * snr / np.sqrt(obs_hours*on_source_fraction*60.*60.)
+
+    # NEFD (Noise Equivalent Flux Density)
+    # .........................................................  
+
+    spectral_NEFD = NEF / W_F_spec
+    continuum_NEFD = NEF / W_F_cont # = spectral_NEFD * eta_IBF < spectral_NEFD
+
+    # Equivalent Trx
+    # .........................................................  
 
     Trx = NEPinst/k/np.sqrt(2*W_F_cont) - T_from_psd(F, psd_wo)  # assumes RJ!
 
 
-    # Make Pandas DataFrame out of the result
+    # ############################################  
+    # 3. Output results as Pandas DataFrame
+    # ############################################    
 
     result = pd.concat([
         pd.Series(F, name='F'),
@@ -386,7 +439,7 @@ def spectrometer_sensitivity(
         pd.Series(Pkid/(W_F_cont * h * F), name='n_ph'),
         pd.Series(NEPkid, name='NEPkid'),
         pd.Series(NEPinst, name='NEPinst'),
-        pd.Series(spectral_NEFD_, name='NEFD_line'),
+        pd.Series(spectral_NEFD, name='NEFD_line'),
         pd.Series(continuum_NEFD, name='NEFD_continuum'),
         pd.Series(NEF, name='NEF'),
         pd.Series(MDLF, name='MDLF'),
@@ -395,6 +448,9 @@ def spectrometer_sensitivity(
         pd.Series(on_source_fraction, name='on_source_fraction'),
         pd.Series(obs_hours*on_source_fraction, name='on_source_hours'),
         pd.Series(Trx, name='equivalent_Trx'),
+        pd.Series(skycoup, name='skycoup'),
+        pd.Series(eta_Al_ohmic, name='eta_Al_ohmic'),
+        # pd.Series(Pkid_warm_jochem, name='Pkid_warm_jochem')
         ], axis=1
         )
 
@@ -457,7 +513,7 @@ def eta_atm_func(F, pwv, EL=60., R=0):
     else:  # smooth with spectrometer resolution
         # 100.0, 100.1., ....., 1000 GHz as in the original data.
         F_highres = eta_atm_df['F']
-        eta_atm_zenith_highres = eta_atm_func_zenith(pwv, F_highres)
+        eta_atm_zenith_highres = np.abs(eta_atm_func_zenith(pwv, F_highres)) ** (1./np.sin(EL*np.pi/180.))
         eta_atm = np.zeros(len(F))
         for i_ch in range(len(F)):
             eta_atm[i_ch] = np.mean(
@@ -506,7 +562,7 @@ def eta_atm_interp(eta_atm_dataframe):
     return func
 
 
-def rad_trans(T_bkg, T_mdm, eta):
+def rad_trans(rad_in, medium, eta):
     """
     Calculates radiation transfer through a semi-transparent medium.
     One can also use the same function for
@@ -514,10 +570,10 @@ def rad_trans(T_bkg, T_mdm, eta):
 
     Parameters
     ----------
-    T_bkg : scalar or vector
+    rad_in : scalar or vector
         brightness temperature (or PSD) of the input
         Units: K
-    T_mdm : scalar
+    medium : scalar
         brightness temperature (or PSD) of the lossy medium
         Units: K
     eta : scalar or vector
@@ -526,11 +582,11 @@ def rad_trans(T_bkg, T_mdm, eta):
 
     Returns
     -------
-    T_b : brightness temperature (or PSD) of the output
+    rad_out : brightness temperature (or PSD) of the output
 
     """
-    T_b = eta * T_bkg + (1 - eta) * T_mdm
-    return T_b
+    rad_out = eta * rad_in + (1 - eta) * medium
+    return rad_out
 
 
 def window_trans(
@@ -652,10 +708,10 @@ def johnson_nyquist_psd(F, T):
 def T_from_psd(
         F,
         psd,
-        method='Callen-Welton'
+        method='Planck'
         ):
     """
-    Calculate Callen-Welton temperature from the PSD a single frequency,
+    Calculate Planck temperature from the PSD a single frequency,
     or an array of frequencies.
 
     Parameters
@@ -667,107 +723,23 @@ def T_from_psd(
         Power Spectral Density.
         Units : W / Hz
     method: optional, sring.
-        default: 'Callen-Welton'
+        default: 'Planck'
         option: 'Rayleigh-Jeans'
-
     Returns
     --------
     T : scalar or vector.
-        Callen-Welton temperature.
+        Planck temperature.
         Units : K
 
     """
-    if method == 'Callen-Welton':
+    if method == 'Planck':
         T = h*F/(k*np.log(h*F/psd+1.))
     elif method is 'Rayleigh-Jeans':
         T = psd / k
     else:
-        sys.exit("Error: Method should be Callen-Welton or Rayleigh-Jeans.")
+        sys.exit("Error: Method should be Planck or Rayleigh-Jeans.")
 
     return T
-
-
-def aperture_efficiency(
-        F,
-        theta_maj,
-        theta_min,
-        eta_mb,
-        telescope_diameter,
-        ):
-    """
-    Calculates telescope aperture efficiency.
-
-    Parameters
-    ----------
-    F : scalar or vector.
-        Frequency
-        Units: Hz
-    theta_maj : scalar or vector.
-        The HPBW along the major axis, assuming a Gaussian beam.
-        Unit: radians.
-    theta_min : scalar or vector.
-        The HPBW along the minor axis, assuming a Gaussian beam.
-        Unit: radians.
-    eta_mb : scalar or vector
-        main beam efficiency.
-        Unit: None.
-    telescope_diameter : float or vector.
-        diameter of the telescope.
-        Units: m
-
-    Returns
-    -------
-    eta_a: scalar or vector.
-        aperture efficiency
-        Units: None.
-
-    """
-
-    omega_mb = np.pi * theta_maj * theta_min / np.log(2) / 4
-    omega_a = omega_mb / eta_mb
-    lmd = c/F
-    Ae = lmd**2 / omega_a
-    Ag = np.pi * (telescope_diameter/2.)**2
-    eta_a = Ae/Ag
-    return eta_a
-
-
-# def eta_source_window(
-#         eta_a=0.171,
-#         eta_pol=0.5,
-#         eta_atm=0.9,
-#         eta_forward=0.94
-#         ):
-#     """
-#     Optical efficiency from an astronomical point source
-#     to the cryostat window.
-#     Factor 2 loss in polarization is included here.
-
-#     Parameters
-#     ----------
-#     eta_a : scalar or vector
-#         aperture efficiency
-#         Units: None.
-#     eta_pol : polarization efficiency. 0.5 for a 1-polarization system.
-#     eta_atm : scalar or vector.
-#         atmospheric trnasmission.
-#         Units: None.
-#     eta_forward : scalar or vector.
-#         Forward efficiency.
-#         Fraction of power seen by the instrument that points
-#         to the sky with respect to the warm environment.
-#         https://deshima.kibe.la/notes/324
-#         Units : None.
-
-#     Returns
-#     -------
-#     eta_source_window_ : scalar or vector.
-#         Optical efficiency from an astronomical point source
-#         to the cryostat window.
-#         Units : None.
-#     """
-#     eta_source_window_ = eta_pol * eta_atm * eta_a * eta_forward
-#     return eta_source_window_
 
 def photon_NEP_kid(
         F,
@@ -797,47 +769,6 @@ def photon_NEP_kid(
     NEPkid = np.sqrt(poisson_term + bunching_term + r_term)
     return NEPkid
 
-
-def spectral_NEFD(
-        NEPinst,
-        eta_source_window,
-        F=350.*10.**9.,
-        R=500,
-        telescope_diameter=10.,
-        ):
-    """
-    Noise Equivalent Flux Density.
-
-    Parameters
-    ----------
-    NEPinst : scalar or vector.
-        NEPinst : Instrumnet NEP (https://arxiv.org/abs/1901.06934).
-        Units: W Hz^0.5
-    eta_source_window_ : scalar or vector.
-        Optical efficiency from an astronomical point source
-        to the cryostat window.
-        Units : None.
-    F : scalar or vector.
-        Frequency
-        Units : Hz
-    R : scalar or vector.
-        spectral resolving power in F/W_F
-        W_F is the 'equivalent bandwidth'
-            http://www.astrosurf.com/buil/us/spe2/hresol7.htm
-        Unit : None.
-    telescope_diameter : float or vector.
-        diameter of the telescope.
-        Units: m
-    """
-    NESP = NEPinst / eta_source_window  # noise equivalent source power
-    radius = telescope_diameter / 2.
-    Ag = np.pi * radius**2.  # physical diameter of the telescope
-    # noise equivalent flux;
-    # sqrt(2) is because NEP is defined for 0.5 s integration.
-    NEF = NESP / Ag / np.sqrt(2)
-    W_F_spec = F/R
-    NEFD_ = NEF / W_F_spec
-    return NEFD_
 
 def deshima_sensitivity_simple(
         pwv = 0.5, # Precipitable Water Vapor in mm
