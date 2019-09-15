@@ -769,8 +769,7 @@ def photon_NEP_kid(
     NEPkid = np.sqrt(poisson_term + bunching_term + r_term)
     return NEPkid
 
-
-def deshima_sensitivity_simple(
+def MDLF_simple(
         pwv = 0.5, # Precipitable Water Vapor in mm
         EL = 60., # Elevation angle in degrees
         snr = 5., # Target S/N of the detection
@@ -856,7 +855,6 @@ def eta_mb_ruze(F, LFlimit, sigma):
     c = 299792458.
     eta_mb = LFlimit* np.exp(- (4.*np.pi* sigma * F/c)**2. )
     return eta_mb
-
 
 def create_download_link(df, title = "Download CSV file", filename = "data.csv"):  
     csv = df.to_csv(index =False)
