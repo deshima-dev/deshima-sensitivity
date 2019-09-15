@@ -10,5 +10,5 @@
   - Once the environment is launched, the calculation is usually fast.
 - [Static Jupyter Notebook  on github](https://github.com/van-der-endo/desim/blob/master/sensitivity.ipynb)
 
-## Introduction
+
 
