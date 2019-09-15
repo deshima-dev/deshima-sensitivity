@@ -832,7 +832,7 @@ def MDLF_simple(
     ax.grid(True)
     ax.set_title("$R="+str(int(D2goal['R'][0]))+", snr=" + str(D2goal['snr'][0]) + ',\ t_\mathrm{obs}=' 
                  +str(D2goal['obs_hours'][0])
-                 +'\mathrm{h}$ PWV=' + str(D2goal['PWV'][0]) + "mm, EL="+str(int(D2goal['EL'][0]))+'deg',
+                 +'\mathrm{h}$ (incl. overhead), PWV=' + str(D2goal['PWV'][0]) + "mm, EL="+str(int(D2goal['EL'][0]))+'deg',
                  fontsize=12)
     ax.legend()
     plt.tight_layout()
