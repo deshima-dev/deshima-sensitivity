@@ -236,7 +236,7 @@ def spectrometer_sensitivity(
         equivalent receiver noise temperature. Units: K
         at the moment this assumes Rayleigh-Jeans!
 
-    Areas to improve
+    Note
     ----------------
     - The parameters to calculate the window transmission / reflection
     is hard-coded in the function window_trans().
@@ -395,7 +395,7 @@ def spectrometer_sensitivity(
     # NEFD (Noise Equivalent Flux Density)
     # .........................................................  
 
-    spectral_NEFD = NEF / W_F_spec
+    spectral_NEFD  = NEF / W_F_spec
     continuum_NEFD = NEF / W_F_cont # = spectral_NEFD * eta_IBF < spectral_NEFD
 
     # Equivalent Trx
@@ -598,7 +598,7 @@ def window_trans(
         tandelta=4.805e-4,  # tan delta, measured Biorad
         tan2delta=1.e-8,
         neffHDPE=1.52,
-        window_AR = False
+        window_AR = True
         ):
     """
     Calculates the window transmission.
@@ -777,7 +777,6 @@ def deshima_sensitivity_simple(
         obs_hours = 8. # Total hours of observation, including ON-OFF and calibration overhead
         ):
 
-    
     Fmin = 220
     Fmax = 440
     
