@@ -783,7 +783,7 @@ def MDLF_simple(
     F = np.linspace(Fmin, Fmax, (Fmax - Fmin)*10 + 1)*1e9 
         
     # Main beam efficiency of ASTE
-    eta_mb = eta_mb_ruze(F=F,LFlimit=0.8,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
+    eta_mb = eta_mb_ruze(F=F,LFlimit=0.805,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
     
     D2goal_input ={
         'F' : F, # Frequency in GHz
