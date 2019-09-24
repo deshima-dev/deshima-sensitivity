@@ -433,6 +433,7 @@ def spectrometer_sensitivity(
         pd.Series(T_from_psd(F, psd_window), name='Tb_window'),
         pd.Series(T_from_psd(F, psd_co), name='Tb_co'),
         pd.Series(T_from_psd(F, psd_KID), name='Tb_KID'),
+        pd.Series(psd_KID, name='psd_KID'),
         pd.Series(Pkid, name='Pkid'),
         pd.Series(Pkid_sky, name='Pkid_sky'),
         pd.Series(Pkid_warm, name='Pkid_warm'),
@@ -573,13 +574,13 @@ def rad_trans(rad_in, medium, eta):
     ----------
     rad_in : scalar or vector
         brightness temperature (or PSD) of the input
-        Units: K
+        Units: K (or W/Hz)
     medium : scalar
         brightness temperature (or PSD) of the lossy medium
-        Units: K
+        Units: K (or W/Hz)
     eta : scalar or vector
         transmission of the lossy medium
-        Units: K
+        Units: K (or W/Hz)
 
     Returns
     -------
