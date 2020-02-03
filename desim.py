@@ -337,8 +337,8 @@ def spectrometer_sensitivity(
     Pkid_warm = psd_KID_warm * W_F_cont
     Pkid_cold = psd_KID_cold * W_F_cont
 
-    if np.all(Pkid != Pkid_sky + Pkid_warm + Pkid_cold):
-        print("WARNING: Pkid != Pkid_sky + Pkid_warm + Pkid_cold")
+    # if np.all(Pkid != Pkid_sky + Pkid_warm + Pkid_cold):
+    #     print("WARNING: Pkid != Pkid_sky + Pkid_warm + Pkid_cold")
 
     # Photon + R(ecombination) NEP of the KID
     # .............................................
