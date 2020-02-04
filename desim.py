@@ -399,11 +399,15 @@ def spectrometer_sensitivity(
     spectral_NEFD  = NEF / W_F_spec
     continuum_NEFD = NEF / W_F_cont # = spectral_NEFD * eta_IBF < spectral_NEFD
 
+    # Mapping Speed (line, 1 channel) (arcmin^2 mJy^-2 h^-1)
+    # .........................................................    
+
+    MS = 60.*60.*1.* omega_mb*(180./np.pi*60.)**2. /(np.sqrt(2)*spectral_NEFD*1e29)**2. # * 49*2
+
     # Equivalent Trx
     # .........................................................  
 
     Trx = NEPinst/k/np.sqrt(2*W_F_cont) - T_from_psd(F, psd_wo)  # assumes RJ!
-
 
     # ############################################  
     # 3. Output results as Pandas DataFrame
@@ -445,6 +449,7 @@ def spectrometer_sensitivity(
         pd.Series(continuum_NEFD, name='NEFD_continuum'),
         pd.Series(NEF, name='NEF'),
         pd.Series(MDLF, name='MDLF'),
+        pd.Series(MS, name='MS'),
         pd.Series(snr, name='snr'),
         pd.Series(obs_hours, name='obs_hours'),
         pd.Series(on_source_fraction, name='on_source_fraction'),
