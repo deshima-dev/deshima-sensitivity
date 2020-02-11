@@ -225,10 +225,9 @@ def spectrometer_sensitivity(
         filter bandwidth. Units: W/m^2/Hz * s^0.5
     NEFD_continuum : Noise Equivalent Flux Density for
         couploing to a countinuum source. Units: W/m^2/Hz * s^0.5
-    NEFD_ : Noise Equivalent Flux Density for
-        couploing to a countinuum source. Units: W/m^2/Hz * s^0.5
     NEF : Noise Equivalent Flux. Units: W/m^2 * s^0.5
     MDLF : Minimum Detectable Line Flux. Units: W/m^2
+    MS : Mapping Speed. Units: (arcmin^2 mJy^-2 h^-1)
     snr : same as input.
     obs_hours : same as input.
     on_source_fraction : same as input.
