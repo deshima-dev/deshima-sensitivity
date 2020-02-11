@@ -865,16 +865,12 @@ def flux_from_line_luminosity(z, d_l, f_obs, L):
 	return L * (F_for1Jykms / L_for1Jykms)
 
 def MDLF_simple(
+        F,
         pwv = 0.5, # Precipitable Water Vapor in mm
         EL = 60., # Elevation angle in degrees
         snr = 5., # Target S/N of the detection
         obs_hours = 8. # Total hours of observation, including ON-OFF and calibration overhead
         ):
-
-    Fmin = 220
-    Fmax = 440
-    
-    F = np.linspace(Fmin, Fmax, (Fmax - Fmin)*10 + 1)*1e9 
         
     # Main beam efficiency of ASTE
     eta_mb = eta_mb_ruze(F=F,LFlimit=0.805,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
@@ -920,7 +916,7 @@ def MDLF_simple(
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("Minimum Detectable Line Flux ($\mathrm{W\ m^{-2}}$)")
     ax.set_yscale('log')
-    ax.set_xlim(Fmin-20,Fmax+20)
+    ax.set_xlim(200,460)
     ax.set_ylim([10**-20,10**-17])
     ax.tick_params(direction='in',which='both')
     ax.grid(True)
@@ -943,14 +939,10 @@ def MDLF_simple(
 
 
 def MS_simple(
+        F,
         pwv = 0.5, # Precipitable Water Vapor in mm
         EL = 60., # Elevation angle in degrees
         ):
-
-    Fmin = 220
-    Fmax = 440
-    
-    F = np.linspace(Fmin, Fmax, (Fmax - Fmin)*10 + 1)*1e9 
         
     # Main beam efficiency of ASTE
     eta_mb = eta_mb_ruze(F=F,LFlimit=0.805,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
@@ -992,7 +984,7 @@ def MS_simple(
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("Mapping Speed ($\mathrm{arcmin^2\ mJy^{-2}\ h^-1}$)")
     ax.set_yscale('log')
-    ax.set_xlim(Fmin-20,Fmax+20)
+    ax.set_xlim(200,460)
     ax.set_ylim([10**-5,10**-2])
     ax.tick_params(direction='in',which='both')
     ax.grid(True)
@@ -1014,10 +1006,7 @@ def MS_simple(
 
 def PlotD2HPBW():
 
-    Fmin = 220
-    Fmax = 440
-    
-    F = np.linspace(Fmin, Fmax, (Fmax - Fmin)*10 + 1)*1e9 
+    F = np.logspace(np.log10(220),np.log10(440),349)*1e9
 
     fig, ax = plt.subplots(1,1,figsize=(12,6))
     ax.plot(F/1e9,D2HPBW(F)*180*60*60/np.pi,linewidth=1,color='b',alpha=1,label='HPBW')
@@ -1025,7 +1014,7 @@ def PlotD2HPBW():
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("HPBW (arcsec)")
     ax.set_yscale('linear')
-    ax.set_xlim(Fmin-20,Fmax+20)
+    ax.set_xlim(200,460)
     # ax.set_ylim([10**-5,10**-2])
     ax.tick_params(direction='in',which='both')
     ax.grid(True)

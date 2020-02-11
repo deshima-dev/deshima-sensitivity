@@ -4,11 +4,11 @@
 
 ## Quick-access to Jupyter Notebooks
 
-- **Interactive version (Binder)**: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/van-der-endo/desim/master?filepath=sensitivity.ipynb)
+- **Interactive version (Binder)**:[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/deshima-dev/desim/master?filepath=sensitivity.ipynb)
   - It can take up to a few minutes the first time you launch the interactive notebook.
   - Until the interactive notebook is loaded, you will see a static preview.
   - Once the environment is launched, the calculation is usually fast.
-- [Static Jupyter Notebook  on github](https://github.com/van-der-endo/desim/blob/master/sensitivity.ipynb)
+- [Static Jupyter Notebook  on github](https://github.com/deshima-dev/desim/blob/master/sensitivity.ipynb)
 
 
 
