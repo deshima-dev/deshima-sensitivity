@@ -401,7 +401,7 @@ def spectrometer_sensitivity(
     # Mapping Speed (line, 1 channel) (arcmin^2 mJy^-2 h^-1)
     # .........................................................    
 
-    MS = 60.*60.*1.* omega_mb*(180./np.pi*60.)**2. /(np.sqrt(2)*spectral_NEFD*1e29)**2. # * 49*2
+    MS = 60.*60.*1.* omega_mb*(180./np.pi*60.)**2. /(np.sqrt(2)*spectral_NEFD*1e29)**2. 
 
     # Equivalent Trx
     # .........................................................  
@@ -954,7 +954,7 @@ def MS_simple(
         'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
         'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
         'eta_mb' : eta_mb, # Main beam efficiency
-        'on_source_fraction':0.4*0.9 # ON-OFF 40%, calibration overhead of 10%
+        'on_off':False 
     }
 
     D2goal = spectrometer_sensitivity(**D2goal_input)
@@ -969,7 +969,7 @@ def MS_simple(
         'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
         'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
         'eta_mb' : eta_mb,
-        'on_source_fraction':0.3*0.8 # <= Goal 0.4*0.9
+        'on_off':False 
     }
     
     D2baseline = spectrometer_sensitivity(**D2baseline_input)
@@ -988,7 +988,7 @@ def MS_simple(
     ax.set_ylim([10**-5,10**-2])
     ax.tick_params(direction='in',which='both')
     ax.grid(True)
-    ax.set_title("$R="+str(int(D2goal['R'][0]))+", PWV=" + str(D2goal['PWV'][0]) + "mm, EL="+str(int(D2goal['EL'][0]))+'deg',
+    ax.set_title("R="+str(int(D2goal['R'][0]))+", PWV=" + str(D2goal['PWV'][0]) + "mm, EL="+str(int(D2goal['EL'][0]))+'deg',
                  fontsize=12)
     ax.legend()
     plt.tight_layout()
