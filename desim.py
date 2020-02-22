@@ -52,7 +52,7 @@ def spectrometer_sensitivity(
         # scalar or vector. 'Alejandro Efficiency',
         # from the feedpoint of the antenna to being absorbed in the KID.
         eta_circuit=0.35,
-        eta_IBF=0.6,
+        eta_IBF=0.5,
         KID_excess_noise_factor = 1.1,
         theta_maj=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
         theta_min=22. * np.pi / 180. / 60. / 60.,  # scalar or vector.
