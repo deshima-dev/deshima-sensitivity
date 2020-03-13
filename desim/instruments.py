@@ -1,6 +1,6 @@
 # dependent packages
 import numpy as np
-from .physics import rad_trans, h, e, c
+from .physics import c, e, h, rad_trans
 
 
 # constants

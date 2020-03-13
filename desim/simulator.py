@@ -4,6 +4,10 @@ __all__ = ["spectrometer_sensitivity"]
 # dependent packages
 import numpy as np
 import pandas as pd
+from .atmosphere import eta_atm_func
+from .instruments import eta_Al_ohmic_850, photon_NEP_kid, window_trans
+from .physics import johnson_nyquist_psd, rad_trans, T_from_psd
+from .physics import c, h, k
 
 
 # main functions
