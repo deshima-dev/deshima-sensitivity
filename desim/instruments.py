@@ -1,53 +1,89 @@
+# standard library
+from typing import List, Union
+
+
 # dependent packages
 import numpy as np
 from .physics import c, e, h, rad_trans
 
 
+# type aliases
+ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
+
+
 # constants
-Delta_Al = 188. * 10**-6 * e  # gap energy of Al
+Delta_Al = 188.0 * 10 ** -6 * e  # gap energy of Al
 eta_pb = 0.4  # Pair breaking efficiency
-eta_Al_ohmic_850 = 0.9975 # Ohmic loss of an Al surface at 850 GHz. Shitov et al., ISSTT2008. https://www.nrao.edu/meetings/isstt/papers/2008/2008263266.pdf
+eta_Al_ohmic_850 = 0.9975  # Ohmic loss of an Al surface at 850 GHz.
+# Shitov et al., ISSTT2008. https://www.nrao.edu/meetings/isstt/papers/2008/2008263266.pdf
 
 
 # main functions
-def D2HPBW(F):
-    HPBW = 29.*240./(F/1e9) * np.pi / 180. / 60. / 60.
-    return HPBW
+def D2HPBW(F: ArrayLike) -> ArrayLike:
+    """Get half-power beam width of DESHIMA 2.0 at given frequency (frequencies).
 
+    Parameters
+    ----------
+    F
+        Frequency. Units: Hz.
 
-def eta_mb_ruze(F, LFlimit, sigma):
-    '''F in Hz, LFlimit is the eta_mb at => 0 Hz, sigma in m'''
-    eta_mb = LFlimit* np.exp(- (4.*np.pi* sigma * F/c)**2. )
-    return eta_mb
+    Returns
+    -------
+    hpbw
+        Half-power beam width. Units: radian.
 
-
-def photon_NEP_kid(
-        F,
-        Pkid,
-        W_F
-        ):
     """
-    NEP of the KID, with respect to the absorbed power.
+    return 29.0 * 240.0 / (F / 1e9) * np.pi / 180.0 / 60.0 / 60.0
+
+
+def eta_mb_ruze(F: ArrayLike, LFlimit: float, sigma: float) -> ArrayLike:
+    """Get main-beam efficiency by Ruze's equation.
+
+    Parameters
+    ----------
+    F
+        Frequency. Units: Hz.
+    LFlimit
+        Main-beam efficiency at 0 Hz.
+    sigma
+        Surface error. Units: m.
+
+    Returns
+    -------
+    eta_mb
+        Main-beam efficiency. Units: None.
+
+    """
+    return LFlimit * np.exp(-((4.0 * np.pi * sigma * F / c) ** 2.0))
+
+
+def photon_NEP_kid(F: ArrayLike, Pkid: ArrayLike, W_F: ArrayLike) -> ArrayLike:
+    """NEP of the KID, with respect to the absorbed power.
 
     Parameters
     -----------
-    F:  Frequency of the signal responsible for loading.
-        Unit: Hz
-    Pkid: Power absorbed by the KID.
-        Unit: W
-    W_F: detection bandwidth, with respect to the power that sets the loading.
-        Unit: Hz
+    F
+        Frequency of the signal responsible for loading. Units: Hz.
+    Pkid
+        Power absorbed by the KID. Units: W.
+    W_F
+        Detection bandwidth, with respect to the power that sets the loading. Units: Hz.
 
-    Note
-    --------
+    Returns
+    -------
+    NEP_kid
+        Noise-equivalent power of the KID.
+
+    Notes
+    -----
     Pkid/(W_F * h * F) gives the occupation number.
+
     """
     # photon_term = 2 * Pkid * (h*F + Pkid/W_F)
     poisson_term = 2 * Pkid * h * F
     bunching_term = 2 * Pkid * Pkid / W_F
     r_term = 4 * Delta_Al * Pkid / eta_pb
-    NEPkid = np.sqrt(poisson_term + bunching_term + r_term)
-    return NEPkid
+    return np.sqrt(poisson_term + bunching_term + r_term)
 
 
 def window_trans(
