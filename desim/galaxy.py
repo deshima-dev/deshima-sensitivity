@@ -1,6 +1,3 @@
-__all__ = ["lineflux"]
-
-
 # standard library
 import os
 

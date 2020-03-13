@@ -1,6 +1,3 @@
-__all__ = ["eta_atm_func"]
-
-
 # standard library
 import os
 
