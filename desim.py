@@ -174,7 +174,7 @@ def spectrometer_sensitivity(
         Fraction of the time on source (between 0. and 1.)
     on_off: True or False
         If the observation involves on_off chopping, then the SNR degrades by sqrt(2) because
-        the signal difference includes the noise twice. 
+        the signal difference includes the noise twice.
 
     Returns
     ----------
@@ -259,7 +259,7 @@ def spectrometer_sensitivity(
     eta_Al_ohmic = (1.-(1.-eta_Al_ohmic_850)*np.sqrt(F/850.e9))
     eta_M1_ohmic = eta_Al_ohmic
     eta_M2_ohmic = eta_Al_ohmic
-    
+
     # Collect efficiencies at the same temperature
     eta_M1 = eta_M1_ohmic * eta_M1_spill
     eta_wo = eta_Al_ohmic**n_wo_mirrors * eta_wo_spill
@@ -269,7 +269,7 @@ def spectrometer_sensitivity(
     # because it is defined as how much power out of the crystat window couples to the cold sky.
     eta_forward = (eta_M1 * eta_M2_ohmic * eta_M2_spill * eta_wo +
                     (1.-eta_M2_spill) * eta_wo)
-    
+
     # Calcuate eta. scalar/vector depending on F.
     eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
 
@@ -297,7 +297,7 @@ def spectrometer_sensitivity(
 
     # Instrument optical efficiency as in JATIS 2019
     # (eta_inst can be calculated only after calculating eta_window)
-    eta_inst = eta_chip * eta_co * eta_window 
+    eta_inst = eta_chip * eta_co * eta_window
 
     # Calculating Sky loading, Warm loading and Cold loading individually for reference
     # (Not required for calculating Pkid, but serves as a consistency check.)
@@ -330,7 +330,7 @@ def spectrometer_sensitivity(
 
     # Loadig power absorbed by the KID
     # .............................................
-    
+
     Pkid = psd_KID * W_F_cont
     Pkid_sky = psd_KID_sky * W_F_cont
     Pkid_warm = psd_KID_warm * W_F_cont
@@ -367,12 +367,12 @@ def spectrometer_sensitivity(
     eta_sw = eta_pol * eta_atm * eta_a * eta_forward # Source-Window coupling
 
     # NESP: Noise Equivalent Source Power (an intermediate quantitiy)
-    # ......................................................... 
+    # .........................................................
 
-    NESP = NEPinst / eta_sw # Noise equivalnet source power 
+    NESP = NEPinst / eta_sw # Noise equivalnet source power
 
     # NEF: Noise Equivalent Flux (an intermediate quantitiy)
-    # ......................................................... 
+    # .........................................................
 
     # From this point, units change from Hz^-0.5 to t^0.5
     # sqrt(2) is because NEP is defined for 0.5 s integration.
@@ -386,31 +386,31 @@ def spectrometer_sensitivity(
         NEF = np.sqrt(2) * NEF
 
     # MDLF (Minimum Detectable Line Flux)
-    # ......................................................... 
- 
+    # .........................................................
+
     # Note that eta_IBF does not matter for MDLF because it is flux.
 
     MDLF = NEF * snr / np.sqrt(obs_hours*on_source_fraction*60.*60.)
 
     # NEFD (Noise Equivalent Flux Density)
-    # .........................................................  
+    # .........................................................
 
     spectral_NEFD  = NEF / W_F_spec
     continuum_NEFD = NEF / W_F_cont # = spectral_NEFD * eta_IBF < spectral_NEFD
 
     # Mapping Speed (line, 1 channel) (arcmin^2 mJy^-2 h^-1)
-    # .........................................................    
+    # .........................................................
 
-    MS = 60.*60.*1.* omega_mb*(180./np.pi*60.)**2. /(np.sqrt(2)*spectral_NEFD*1e29)**2. 
+    MS = 60.*60.*1.* omega_mb*(180./np.pi*60.)**2. /(np.sqrt(2)*spectral_NEFD*1e29)**2.
 
     # Equivalent Trx
-    # .........................................................  
+    # .........................................................
 
     Trx = NEPinst/k/np.sqrt(2*W_F_cont) - T_from_psd(F, psd_wo)  # assumes RJ!
 
-    # ############################################  
+    # ############################################
     # 3. Output results as Pandas DataFrame
-    # ############################################    
+    # ############################################
 
     result = pd.concat([
         pd.Series(F, name='F'),
@@ -763,7 +763,7 @@ def photon_NEP_kid(
         Unit: W
     W_F: detection bandwidth, with respect to the power that sets the loading.
         Unit: Hz
-    
+
     Note
     --------
     Pkid/(W_F * h * F) gives the occupation number.
@@ -774,7 +774,7 @@ def photon_NEP_kid(
     r_term = 4 * Delta_Al * Pkid / eta_pb
     NEPkid = np.sqrt(poisson_term + bunching_term + r_term)
     return NEPkid
-    
+
 def D2HPBW(F):
     HPBW = 29.*240./(F/1e9) * np.pi / 180. / 60. / 60.
     return HPBW
@@ -785,7 +785,7 @@ def eta_mb_ruze(F, LFlimit, sigma):
     eta_mb = LFlimit* np.exp(- (4.*np.pi* sigma * F/c)**2. )
     return eta_mb
 
-def create_download_link(df, title = "Download CSV file", filename = "data.csv"):  
+def create_download_link(df, title = "Download CSV file", filename = "data.csv"):
     csv = df.to_csv(index =False)
     b64 = base64.b64encode(csv.encode())
     payload = b64.decode()
@@ -871,10 +871,10 @@ def MDLF_simple(
         snr = 5., # Target S/N of the detection
         obs_hours = 8. # Total hours of observation, including ON-OFF and calibration overhead
         ):
-        
+
     # Main beam efficiency of ASTE
     eta_mb = eta_mb_ruze(F=F,LFlimit=0.805,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
-    
+
     D2goal_input ={
         'F' : F, # Frequency in GHz
         'pwv':pwv, # Precipitable Water Vapor in mm
@@ -888,13 +888,13 @@ def MDLF_simple(
     }
 
     D2goal = spectrometer_sensitivity(**D2goal_input)
-    
+
     D2baseline_input = {
         'F' : F,
         'pwv':pwv,
         'EL':EL,
-        'eta_circuit' : 0.32 * 0.5, # <= eta_inst Goal 16%, Baseline 8% 
-        'eta_IBF' : 0.4, # <= Goal 0.6 
+        'eta_circuit' : 0.32 * 0.5, # <= eta_inst Goal 16%, Baseline 8%
+        'eta_IBF' : 0.4, # <= Goal 0.6
         'KID_excess_noise_factor' : 1.2, # Goal 1.1
         'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
         'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
@@ -903,16 +903,16 @@ def MDLF_simple(
         'obs_hours' :obs_hours,
         'on_source_fraction':0.3*0.8 # <= Goal 0.4*0.9
     }
-    
+
     D2baseline = spectrometer_sensitivity(**D2baseline_input)
-            
+
     ### Plot-------------------
-    
+
     fig, ax = plt.subplots(1,1,figsize=(12,6))
     ax.plot(D2baseline['F']/1e9,D2baseline['MDLF'],'--',linewidth=1,color='b',alpha=1,label='Baseline')
     ax.plot(D2goal['F']/1e9,D2goal['MDLF'],linewidth=1,color='b',alpha=1,label='Goal')
     ax.fill_between(D2baseline['F']/1e9,D2baseline['MDLF'],D2goal['MDLF'],color='b',alpha=0.2)
-    
+
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("Minimum Detectable Line Flux ($\mathrm{W\ m^{-2}}$)")
     ax.set_yscale('log')
@@ -920,7 +920,7 @@ def MDLF_simple(
     ax.set_ylim([10**-20,10**-17])
     ax.tick_params(direction='in',which='both')
     ax.grid(True)
-    ax.set_title("$R="+str(int(D2goal['R'][0]))+", snr=" + str(D2goal['snr'][0]) + ',\ t_\mathrm{obs}=' 
+    ax.set_title("$R="+str(int(D2goal['R'][0]))+", snr=" + str(D2goal['snr'][0]) + ',\ t_\mathrm{obs}='
                  +str(D2goal['obs_hours'][0])
                  +'\mathrm{h}$ (incl. overhead), PWV=' + str(D2goal['PWV'][0]) + "mm, EL="+str(int(D2goal['EL'][0]))+'deg',
                  fontsize=12)
@@ -943,10 +943,10 @@ def MS_simple(
         pwv = 0.5, # Precipitable Water Vapor in mm
         EL = 60., # Elevation angle in degrees
         ):
-        
+
     # Main beam efficiency of ASTE
     eta_mb = eta_mb_ruze(F=F,LFlimit=0.805,sigma=37e-6) * 0.9 # see specs, 0.9 is from EM, ruze is from ASTE
-    
+
     D2goal_input ={
         'F' : F, # Frequency in GHz
         'pwv':pwv, # Precipitable Water Vapor in mm
@@ -954,33 +954,33 @@ def MS_simple(
         'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
         'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
         'eta_mb' : eta_mb, # Main beam efficiency
-        'on_off':False 
+        'on_off':False
     }
 
     D2goal = spectrometer_sensitivity(**D2goal_input)
-    
+
     D2baseline_input = {
         'F' : F,
         'pwv':pwv,
         'EL':EL,
-        'eta_circuit' : 0.32 * 0.5, # <= eta_inst Goal 16%, Baseline 8% 
-        'eta_IBF' : 0.4, # <= Goal 0.6 
+        'eta_circuit' : 0.32 * 0.5, # <= eta_inst Goal 16%, Baseline 8%
+        'eta_IBF' : 0.4, # <= Goal 0.6
         'KID_excess_noise_factor' : 1.2, # Goal 1.1
         'theta_maj' : D2HPBW(F), # Half power beam width (major axis)
         'theta_min' : D2HPBW(F), # Half power beam width (minor axis)
         'eta_mb' : eta_mb,
-        'on_off':False 
+        'on_off':False
     }
-    
+
     D2baseline = spectrometer_sensitivity(**D2baseline_input)
-            
+
     ### Plot-------------------
-    
+
     fig, ax = plt.subplots(1,1,figsize=(12,6))
     ax.plot(D2baseline['F']/1e9,D2baseline['MS'],'--',linewidth=1,color='b',alpha=1,label='Baseline')
     ax.plot(D2goal['F']/1e9,D2goal['MS'],linewidth=1,color='b',alpha=1,label='Goal')
     ax.fill_between(D2baseline['F']/1e9,D2baseline['MS'],D2goal['MS'],color='b',alpha=0.2)
-    
+
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("Mapping Speed ($\mathrm{arcmin^2\ mJy^{-2}\ h^-1}$)")
     ax.set_yscale('log')
@@ -1010,7 +1010,7 @@ def PlotD2HPBW():
 
     fig, ax = plt.subplots(1,1,figsize=(12,6))
     ax.plot(F/1e9,D2HPBW(F)*180*60*60/np.pi,linewidth=1,color='b',alpha=1,label='HPBW')
-    
+
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("HPBW (arcsec)")
     ax.set_yscale('linear')
@@ -1026,5 +1026,5 @@ def PlotD2HPBW():
 
     df_download = pd.DataFrame(data=F,columns=['F'])
     df_download['HPBW'] = D2HPBW(F)*180*60*60/np.pi
-    
+
     return create_download_link(df_download,filename='HPBW.csv')
