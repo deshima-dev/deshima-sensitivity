@@ -18,3 +18,4 @@ Q.  Where is the point-source coupling phase and amplitude loss
 from . import atmosphere
 from . import galaxy
 from . import instruments
+from . import physics
