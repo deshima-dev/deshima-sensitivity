@@ -843,26 +843,26 @@ def lineflux(
     return Fcii_DGS, Foiii_DGS, Foi_DGS, f_cii, f_oiii, f_oi, z
 
 def co_luminosity(z, d_l, f_obs, int):
-	
-	c1, c2 = 3.25e+07, 1.04e-03
-	
-	#Lp  = c1 * int * d_l**2 / (f_obs**2 * (1 + z)**3 )
-	L   = c2 * int * d_l**2 * f_obs
-	
-	return L
+
+    c1, c2 = 3.25e+07, 1.04e-03
+
+    #Lp  = c1 * int * d_l**2 / (f_obs**2 * (1 + z)**3 )
+    L   = c2 * int * d_l**2 * f_obs
+
+    return L
 
 
 def flux_from_line_luminosity(z, d_l, f_obs, L):
-	"""
-		d_l - luminosity distance (Mpc)
-		f_obs - observing frequency (GHz)
-		L - line luminosity (L_Sun)
-	"""
-	
-	L_for1Jykms = co_luminosity(z, d_l, f_obs,  1.000) ## Lsun
-	F_for1Jykms = 1.000 * 1e-26 * (f_obs  * 1e9 / 299792.458) ## W m^-2
+    """
+        d_l - luminosity distance (Mpc)
+        f_obs - observing frequency (GHz)
+        L - line luminosity (L_Sun)
+    """
 
-	return L * (F_for1Jykms / L_for1Jykms)
+    L_for1Jykms = co_luminosity(z, d_l, f_obs,  1.000) ## Lsun
+    F_for1Jykms = 1.000 * 1e-26 * (f_obs  * 1e9 / 299792.458) ## W m^-2
+
+    return L * (F_for1Jykms / L_for1Jykms)
 
 def MDLF_simple(
         F,
