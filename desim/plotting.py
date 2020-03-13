@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from IPython.display import HTML
-from .deshima import D2HPBW
-from .telescope import eta_mb_ruze
+from .instruments import D2HPBW, eta_mb_ruze
 from .simulator import spectrometer_sensitivity
 
 
