@@ -52,7 +52,7 @@ def eta_atm_func(F, pwv, EL=60., R=0):
 
     eta_atm_df = pd.read_csv(
         # os.path https://qiita.com/ymdymd/items/d758110d429f72bc10fb
-        os.path.dirname(__file__)+'/data/atm.csv',
+        os.path.dirname(__file__)+'/../data/atm.csv',
         skiprows=4,
         delim_whitespace=True,
         header=0

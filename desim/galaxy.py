@@ -27,7 +27,7 @@ def lineflux(
 
     z_Dl_df = pd.read_csv(
         # os.path https://qiita.com/ymdymd/items/d758110d429f72bc10fb
-        os.path.dirname(__file__)+'/data/z_Dl.csv',
+        os.path.dirname(__file__)+'/../data/z_Dl.csv',
         skiprows=0,
         delim_whitespace=False,
         header=0
