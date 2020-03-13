@@ -87,68 +87,72 @@ def photon_NEP_kid(F: ArrayLike, Pkid: ArrayLike, W_F: ArrayLike) -> ArrayLike:
 
 
 def window_trans(
-        F,
-        psd_in,
-        psd_cabin,
-        psd_co,
-        thickness=8.e-3,    # in m
-        tandelta=4.805e-4,  # tan delta, measured Biorad
-        tan2delta=1.e-8,
-        neffHDPE=1.52,
-        window_AR = True
-        ):
-    """
-    Calculates the window transmission.
+    F: ArrayLike,
+    psd_in: ArrayLike,
+    psd_cabin: ArrayLike,
+    psd_co: ArrayLike,
+    thickness: ArrayLike = 8.0e-3,
+    tandelta: float = 4.805e-4,
+    tan2delta: float = 1.0e-8,
+    neffHDPE: float = 1.52,
+    window_AR: bool = True,
+) -> List[ArrayLike, ArrayLike]:
+    """Calculates the window transmission.
 
     Parameters
     ----------
-    F : scalar or vector.
-        Frequency
-        Units: Hz
-    psd_in : scalar or vector.
-        PSD of the incoming signal.
-        Units : W / Hz
-    psd_cabin : scalar or vector.
-        Johnson-Nyquist PSD of telescope cabin temperature.
-        Units : W / Hz
-    psd_co : scalar or vector.
-        Johnson-Nyquist PSD of cold-optics temperature.
-        Units : W / Hz
-    thickness: scalar or vector.
-        thickness of the HDPE window.
-        Units: m
-    tandelta, tan2delta : scalar
-        values from Stephen.
-            "# 2.893e-8 %% tan delta, measured Biorat. I use 1e-8 as this fits
-            the tail of the data better"
-    neffHDPE : scalar
-        refractive index of HDPE. set to 1 to remove reflections.
-        Units : None.
+    F
+        Frequency. Units: Hz.
+    psd_in
+        PSD of the incoming signal. Units : W / Hz.
+    psd_cabin
+        Johnson-Nyquist PSD of telescope cabin temperature. Units : W / Hz.
+    psd_co
+        Johnson-Nyquist PSD of cold-optics temperature. Units : W / Hz.
+    thickness
+        Thickness of the HDPE window. Units: m.
+    tandelta
+        Values from Stephen. "# 2.893e-8 %% tan delta, measured Biorat.
+        I use 1e-8 as this fits the tail of the data better".
+    tan2delta
+        Values from Stephen. "# 2.893e-8 %% tan delta, measured Biorat.
+        I use 1e-8 as this fits the tail of the data better".
+    neffHDPE
+        Refractive index of HDPE. Set to 1 to remove reflections. Units : None.
+    window_AR
+        Whether the window is supposed to be coated by Ar (True) or not (False).
+
 
     Returns
     -------
-    psd_after_2nd_refl : scalar or vector
-        PSD looking into the window from the cold optics
-    eta_window : scalar or vector
-        transmission of the window
+    psd_after_2nd_refl
+        PSD looking into the window from the cold optics.
+    eta_window
+        Transmission of the window. Units: None.
 
     """
     # Parameters to calcualte the window (HDPE), data from Stephen
     # reflection. ((1-neffHDPE)/(1+neffHDPE))^2. Set to 0 for Ar coated.
 
-    if window_AR is True:
-        HDPErefl = 0.
+    if window_AR:
+        HDPErefl = 0.0
     else:
-        HDPErefl = ((1-neffHDPE)/(1+neffHDPE))**2
+        HDPErefl = ((1 - neffHDPE) / (1 + neffHDPE)) ** 2
 
-    eta_HDPE = np.exp(-thickness * 2 * np.pi * neffHDPE *
-                      (tandelta * F / c + tan2delta * (F / c)**2))
+    eta_HDPE = np.exp(
+        -thickness
+        * 2
+        * np.pi
+        * neffHDPE
+        * (tandelta * F / c + tan2delta * (F / c) ** 2)
+    )
+
     # most of the reflected power sees the cold.
-    psd_after_1st_refl = rad_trans(psd_in, psd_co, 1.-HDPErefl)
+    psd_after_1st_refl = rad_trans(psd_in, psd_co, 1.0 - HDPErefl)
     psd_before_2nd_refl = rad_trans(psd_after_1st_refl, psd_cabin, eta_HDPE)
     # the reflected power sees the cold.
-    psd_after_2nd_refl = rad_trans(psd_before_2nd_refl, psd_co, 1.-HDPErefl)
+    psd_after_2nd_refl = rad_trans(psd_before_2nd_refl, psd_co, 1.0 - HDPErefl)
 
-    eta_window = (1.-HDPErefl)**2 * eta_HDPE
+    eta_window = (1.0 - HDPErefl) ** 2 * eta_HDPE
 
     return psd_after_2nd_refl, eta_window
