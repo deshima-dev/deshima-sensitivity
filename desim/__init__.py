@@ -16,3 +16,4 @@ Q.  Where is the point-source coupling phase and amplitude loss
 
 # modules
 from . import atmosphere
+from . import galaxy
