@@ -20,7 +20,9 @@ from . import galaxy
 from . import instruments
 from . import physics
 from . import plotting
+from . import simulator
 
 
 # aliases
 from .plotting import *
+from .simulator import *
