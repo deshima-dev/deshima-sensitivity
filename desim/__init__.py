@@ -13,3 +13,6 @@ Q.  Where is the point-source coupling phase and amplitude loss
             but the power (in transmission) couples to the sky.
 """
 
+
+# modules
+from . import atmosphere
