@@ -19,3 +19,8 @@ from . import atmosphere
 from . import galaxy
 from . import instruments
 from . import physics
+from . import plotting
+
+
+# aliases
+from .plotting import *
