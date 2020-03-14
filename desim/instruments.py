@@ -1,5 +1,5 @@
 # standard library
-from typing import List, Union
+from typing import List, Union, Tuple
 
 
 # dependent packages
@@ -96,7 +96,7 @@ def window_trans(
     tan2delta: float = 1.0e-8,
     neffHDPE: float = 1.52,
     window_AR: bool = True,
-) -> List[ArrayLike, ArrayLike]:
+) -> Tuple[ArrayLike, ArrayLike]:
     """Calculates the window transmission.
 
     Parameters
