@@ -18,7 +18,7 @@ ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
 
 # main functions
 def eta_atm_func(
-    F: ArrayLike, pwv: float, EL: float = 60.0, R: ArrayLike = 0.0
+    F: ArrayLike, pwv: float, EL: float = 60.0, R: float = 0.0
 ) -> ArrayLike:
     """Calculate eta_atm as a function of F by interpolation.
 
