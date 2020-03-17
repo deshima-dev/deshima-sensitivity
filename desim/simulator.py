@@ -228,12 +228,11 @@ def spectrometer_sensitivity(
 
     """
     # Equivalent Bandwidth of 1 channel.
-    W_F_cont = (
-        F / R / eta_IBF
-    )  # Used for calculating loading and coupling to a continuum source
-    W_F_spec = (
-        F / R
-    )  # Used for calculating coupling to a line source, with a linewidth not wider than the filter channel
+    # Used for calculating loading and coupling to a continuum source
+    W_F_cont = F / R / eta_IBF
+    # Used for calculating coupling to a line source,
+    # with a linewidth not wider than the filter channel
+    W_F_spec = F / R
 
     # #############################################################
     # 1. Calculating loading power absorbed by the KID, and the NEP
@@ -254,7 +253,8 @@ def spectrometer_sensitivity(
     eta_chip = eta_lens_antenna_rad * eta_circuit
 
     # Forward efficiency: does/should not include window loss
-    # because it is defined as how much power out of the crystat window couples to the cold sky.
+    # because it is defined as how much power out of
+    # the crystat window couples to the cold sky.
     eta_forward = (
         eta_M1 * eta_M2_ohmic * eta_M2_spill * eta_wo + (1.0 - eta_M2_spill) * eta_wo
     )
@@ -262,7 +262,8 @@ def spectrometer_sensitivity(
     # Calcuate eta. scalar/vector depending on F.
     eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
 
-    # Johnson-Nyquist Power Spectral Density (W/Hz) for the physical temperatures of each stage
+    # Johnson-Nyquist Power Spectral Density (W/Hz)
+    # for the physical temperatures of each stage
 
     psd_jn_cmb = johnson_nyquist_psd(F=F, T=Tb_cmb)
     psd_jn_amb = johnson_nyquist_psd(F=F, T=Tp_amb)
@@ -400,7 +401,7 @@ def spectrometer_sensitivity(
     # If the observation is involves ON-OFF sky subtraction,
     # Subtraction of two noisy sources results in sqrt(2) increase in noise.
 
-    if on_off == True:
+    if on_off:
         NEF = np.sqrt(2) * NEF
 
     # MDLF (Minimum Detectable Line Flux)
