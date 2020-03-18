@@ -1,5 +1,5 @@
 # standard library
-from typing import List, Union
+from dataclasses import dataclass
 
 
 # dependent packages
@@ -15,6 +15,63 @@ h = 6.62607004 * 10 ** -34  # Planck constant
 k = 1.38064852 * 10 ** -23  # Boltzmann constant
 e = 1.60217662 * 10 ** -19  # electron charge
 c = 299792458.0  # velocity of light
+
+
+# main classes
+@dataclass(frozen=True)
+class Layer:
+    efficiency: ArrayLike
+    brightness: ArrayLike = 0.0
+
+    @property
+    def b(self: "Layer") -> ArrayLike:
+        """Alias of ``brightness`` attribute."""
+        return self.brightness
+
+    @property
+    def eff(self: "Layer") -> ArrayLike:
+        """Alias of ``efficiency`` attribute."""
+        return self.efficiency
+
+    def transfer(self: "Layer", radiation: "Radiation") -> "Radiation":
+        """Compute radiative transfer through a layer."""
+        return self.eff * radiation + (1 - self.eff) * self.b
+
+    def append(self: "Layer", layer: "Layer") -> "Layer":
+        """Append a layer to compose a new one."""
+        eff_1, eff_2 = self.eff, layer.eff
+        b_1, b_2 = self.b, layer.b
+
+        if np.any(eff_1 * eff_2 == 1.0):
+            raise ValueError("Cannot append a layer.")
+
+        eff_12 = eff_1 * eff_2
+        b_12 = (1 - eff_1) / (1 - eff_12) * (eff_2 * b_1)
+        b_12 += (1 - eff_2) / (1 - eff_12) * b_2
+
+        return Layer(eff_12, b_12)
+
+    def __or__(self: "Layer", layer: "Layer") -> "Layer":
+        """Operator for ``append`` method."""
+        return self.append(layer)
+
+
+class Radiation(np.ndarray):
+    def __new__(cls, brightness: ArrayLike, **kwargs) -> "Radiation":
+        """Create a radiation instance which express brightness."""
+        return np.asarray(brightness, **kwargs).view(cls)
+
+    def to_array(self: "Radiation") -> np.ndarray:
+        """Convert it to a pure NumPy array."""
+        return self.view(np.ndarray)
+
+    def pass_through(self: "Radiation", layer: "Layer") -> "Radiation":
+        """Compute radiative transfer through a layer."""
+        return layer.transfer(self)
+
+    def __or__(self: "Radiation", layer: "Layer") -> "Radiation":
+        """Operator for ``path_through`` method."""
+        return self.pass_through(layer)
 
 
 # main functions
