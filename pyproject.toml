@@ -10,6 +10,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
+astropy = "^4.0"
 dataclasses = { version = "^0.7", python = "~3.6" }
 jupyter-io = "^0.1"
 matplotlib = "^3.1"
