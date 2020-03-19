@@ -26,3 +26,5 @@ jobs:
         run: poetry run flake8 desim
       - name: Format with flake8
         run: poetry run black --check desim
+      - name: Test with pytest
+        run: poetry run pytest
