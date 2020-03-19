@@ -1,168 +1,177 @@
 # standard library
+from typing import Type, Union
 from dataclasses import dataclass
-
 
 # dependent packages
 import numpy as np
+import pandas as pd
+from consts import h, k
 
 
 # type aliases
-ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
+ArrayLike = Union[np.ndarray, float, int]
 
 
 # constants
-h = 6.62607004 * 10 ** -34  # Planck constant
-k = 1.38064852 * 10 ** -23  # Boltzmann constant
-e = 1.60217662 * 10 ** -19  # electron charge
-c = 299792458.0  # velocity of light
+UNITS_T = "K"
+UNITS_PSD = "W/Hz"
 
 
 # main classes
-@dataclass(frozen=True)
-class Layer:
-    efficiency: ArrayLike
-    brightness: ArrayLike = 0.0
+class Radiation(pd.Series):
+    """Radiation class for calculating radiative transfer.
+
+    This is a subclass of pandas Series with custom attributes and methods.
+    An instance is created by ``radiation = Radiation(data, index)``,
+    where ``data`` is value(s) of radiation expressed as (brightness) temperature
+    (K) and ``index`` is value(s) of frequency (Hz) which correspond to data.
+
+    """
+
+    _metadata = ["units"]
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.units = UNITS_T
 
     @property
-    def b(self: "Layer") -> ArrayLike:
-        """Alias of ``brightness`` attribute."""
-        return self.brightness
+    def _constructor(self) -> Type["Radiation"]:
+        """Special property for subclassing pandas Series."""
+        return Radiation
+
+    @property
+    def nu(self) -> np.ndarray:
+        """Returns frequency index as a NumPy array."""
+        return self.index.values
+
+    def to_psd(self) -> "Radiation":
+        """Convert temperature (K) to Johnson-Nyquist PSD (W/Hz).
+
+        This method can only be used if radiation is expressed as
+        (brightness) temperature (i.e., ``radiation.units == 'K'``).
+
+        Returns
+        -------
+        radiation
+            Radiation instance expressed as Johnson-Nyquist PSD.
+
+        """
+        if not self.units == UNITS_T:
+            raise ValueError(f"Units must be {UNITS_T}.")
+
+        new = h * self.nu / (np.exp(h * self.nu / (k * self)) - 1.0)
+        new.units = UNITS_PSD
+        return new
+
+    def to_temperature(self, method: str = "planck") -> "Radiation":
+        """Convert Johnson-Nyquist PSD (W/Hz) to temperature (K).
+
+        This method can only be used if radiation is expressed as
+        Johnson-Nyquist PSD (i.e., ``radiation.units == 'W/Hz'``).
+
+        Parameters
+        ----------
+        method
+            Conversion method. Must be either 'planck' (default: no RJ
+            approximation) or 'rj' (Rayleigh-Jeans approximation).
+
+        Returns
+        -------
+        radiation
+            Radiation instance expressed as (brightness) temperature.
+
+        """
+        if not self.units == UNITS_PSD:
+            raise ValueError(f"Units must be {UNITS_PSD}.")
+
+        if method == "planck":
+            new = h * self.nu / (k * np.log(h * self.nu / self + 1.0))
+        elif method == "rj":
+            new = self / k
+        else:
+            raise ValueError("Method must be either 'planck' or 'rj'.")
+
+        new.units = UNITS_T
+        return new
+
+    def pass_through(self, layer: "Layer") -> "Radiation":
+        """Compute radiative transfer through a layer."""
+        return layer.transfer(self)
+
+    def __or__(self, layer: "Layer") -> "Radiation":
+        """Operator for ``pass_through`` method.
+
+        This means that a code ``radiation | layer`` is
+        equivalent to ``radiation.pass_through(layer)``.
+
+        """
+        return self.pass_through(layer)
+
+
+@dataclass(frozen=True)
+class Layer:
+    """Semi-transparent layer class for calculating radiative transfer.
+
+    An instance is created by ``layer = Layer(eff, src)``,
+    where ``eff`` is efficiency (transparency) of the layer
+    and ``src`` is a source function (either in K or W/Hz) of the layer.
+    Radiative transfer is expressed by ``rad_out = rad_in | layer``,
+    where ``rad_in`` and ``rad_out`` are instances of ``Radiation`` class.
+    This is equivalent to ``rad_out = eff * rad_in + (1-eff) * src``.
+    Radiative transfer with multiple layers is similarly expressed::
+
+        rad_out = rad_in | layer_1 | layer_2 | ...
+
+    Multiple layers can be combined before radiative transfer::
+
+        # equivalent to the example above
+        layers = layer_1 | layer_2 | ...
+        rad_out = rad_in | layers
+
+    This makes it easy to reuse the layer and reduce computation costs.
+
+    Parameters
+    ----------
+    efficiency
+        Efficiency (transparency) of the layer.
+    source
+        Source function expressed by either brighness temperature (K)
+        or Johnson-Nyquist PSD (W/Hz). Units of input radiation must
+        be same as those of source.
+
+    """
+
+    efficiency: ArrayLike = 1.0
+    source: Union[Radiation, ArrayLike] = 0.0
 
     @property
     def eff(self: "Layer") -> ArrayLike:
         """Alias of ``efficiency`` attribute."""
         return self.efficiency
 
-    def transfer(self: "Layer", radiation: "Radiation") -> "Radiation":
-        """Compute radiative transfer through a layer."""
-        return self.eff * radiation + (1 - self.eff) * self.b
+    @property
+    def src(self: "Layer") -> Union[Radiation, ArrayLike]:
+        """Alias of ``source`` attribute."""
+        return self.source
 
-    def append(self: "Layer", layer: "Layer") -> "Layer":
+    def transfer(self, radiation: Radiation) -> Radiation:
+        """Compute radiative transfer through a layer."""
+        return self.eff * radiation + (1 - self.eff) * self.src
+
+    def append(self, layer: "Layer") -> "Layer":
         """Append a layer to compose a new one."""
         eff_1, eff_2 = self.eff, layer.eff
-        b_1, b_2 = self.b, layer.b
+        src_1, src_2 = self.src, layer.src
 
         if np.any(eff_1 * eff_2 == 1.0):
             raise ValueError("Cannot append a layer.")
 
         eff_12 = eff_1 * eff_2
-        b_12 = (1 - eff_1) / (1 - eff_12) * (eff_2 * b_1)
-        b_12 += (1 - eff_2) / (1 - eff_12) * b_2
+        src_12 = (1 - eff_1) / (1 - eff_12) * (eff_2 * src_1)
+        src_12 += (1 - eff_2) / (1 - eff_12) * src_2
 
-        return Layer(eff_12, b_12)
+        return Layer(eff_12, src_12)
 
-    def __or__(self: "Layer", layer: "Layer") -> "Layer":
+    def __or__(self, layer: "Layer") -> "Layer":
         """Operator for ``append`` method."""
         return self.append(layer)
-
-
-class Radiation(np.ndarray):
-    def __new__(cls, brightness: ArrayLike, **kwargs) -> "Radiation":
-        """Create a radiation instance which express brightness."""
-        return np.asarray(brightness, **kwargs).view(cls)
-
-    def to_array(self: "Radiation") -> np.ndarray:
-        """Convert it to a pure NumPy array."""
-        return self.view(np.ndarray)
-
-    def pass_through(self: "Radiation", layer: "Layer") -> "Radiation":
-        """Compute radiative transfer through a layer."""
-        return layer.transfer(self)
-
-    def __or__(self: "Radiation", layer: "Layer") -> "Radiation":
-        """Operator for ``path_through`` method."""
-        return self.pass_through(layer)
-
-
-# main functions
-def rad_trans(rad_in: ArrayLike, medium: ArrayLike, eta: ArrayLike) -> ArrayLike:
-    """Calculates radiation transfer through a semi-transparent medium.
-
-    One can also use the same function for Johnson-Nyquist PSD
-    (power spectral density) instead of temperature.
-
-    Parameters
-    ----------
-    rad_in
-        Brightness temperature (or PSD) of the input. Units: K (or W/Hz).
-    medium
-        Brightness temperature (or PSD) of the lossy medium. Units: K (or W/Hz).
-    eta
-        Transmission of the lossy medium. Units: K (or W/Hz).
-
-    Returns
-    -------
-    rad_out
-        Brightness temperature (or PSD) of the output.
-
-    """
-    return eta * rad_in + (1 - eta) * medium
-
-
-def T_from_psd(F: ArrayLike, psd: ArrayLike, method: str = "Planck") -> ArrayLike:
-    """Calculate Planck temperature from the PSD frequency (frequencies).
-
-    Parameters
-    ----------
-    F
-        Frequency. Units: Hz.
-    psd
-        Power Spectral Density. Units: W / Hz.
-    method
-        Default: 'Planck'. Option: 'Rayleigh-Jeans'.
-
-    Returns
-    --------
-    T
-        Planck temperature. Units: K.
-
-    """
-    if method == "Planck":
-        return h * F / (k * np.log(h * F / psd + 1.0))
-    elif method == "Rayleigh-Jeans":
-        return psd / k
-    else:
-        raise ValueError("Method should be Planck or Rayleigh-Jeans.")
-
-
-def johnson_nyquist_psd(F: ArrayLike, T: ArrayLike) -> ArrayLike:
-    """Johnson-Nyquist power spectral density.
-
-    Don't forget to multiply with bandwidth to caculate the total power in W.
-
-    Parameters
-    ----------
-    F
-        Frequency. Units: Hz.
-    T
-        Temperature. Units: K.
-
-    Returns
-    --------
-    psd
-        Power Spectral Density. Units: W / Hz.
-
-    """
-    return h * F * nph(F, T)
-
-
-# helper functions
-def nph(F: ArrayLike, T: ArrayLike) -> ArrayLike:
-    """Photon occupation number of Bose-Einstein Statistics.
-
-    If it is not single temperature, use nph = Pkid / (W_F * h * F).
-
-    Parameters
-    ----------
-    F
-        Frequency. Units: Hz.
-    T
-        Temperature. Units: K.
-
-    Returns
-    --------
-    n
-        Photon occupation number. Units: None.
-
-    """
-    return 1.0 / (np.exp(h * F / (k * T)) - 1.0)
