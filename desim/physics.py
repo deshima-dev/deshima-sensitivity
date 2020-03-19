@@ -5,7 +5,7 @@ from dataclasses import dataclass
 # dependent packages
 import numpy as np
 import pandas as pd
-from consts import h, k
+from .consts import h, k
 
 
 # type aliases
