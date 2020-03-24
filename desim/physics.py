@@ -15,6 +15,7 @@ ArrayLike = Union[np.ndarray, float, int]
 # constants
 UNITS_T = "K"
 UNITS_PSD = "W/Hz"
+UNITS_ATTR = "units"
 
 
 # main classes
@@ -28,11 +29,13 @@ class Radiation(pd.Series):
 
     """
 
-    _metadata = ["units"]
+    _metadata = [UNITS_ATTR]
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.units = UNITS_T
+
+        if not hasattr(self, UNITS_ATTR):
+            self.units = UNITS_T
 
     @property
     def _constructor(self) -> Type["Radiation"]:
