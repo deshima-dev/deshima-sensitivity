@@ -31,7 +31,7 @@ def spectrometer_sensitivity(
     window_AR: bool = True,
     eta_co: ArrayLike = 0.65,
     eta_lens_antenna_rad: ArrayLike = 0.81,
-    eta_circuit: ArrayLike = 0.35,
+    eta_circuit: ArrayLike = 0.32,
     eta_IBF: ArrayLike = 0.5,
     KID_excess_noise_factor: float = 1.1,
     theta_maj: ArrayLike = 22.0 * np.pi / 180.0 / 60.0 / 60.0,
