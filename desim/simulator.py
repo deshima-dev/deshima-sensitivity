@@ -277,9 +277,7 @@ def spectrometer_sensitivity(
 
     psd_sky = rad_trans(rad_in=psd_jn_cmb, medium=psd_jn_amb, eta=eta_atm)
     psd_M1 = rad_trans(rad_in=psd_sky, medium=psd_jn_amb, eta=eta_M1)
-    psd_M2_spill = rad_trans(
-        rad_in=psd_M1, medium=psd_sky, eta=eta_M2_spill
-    )  # Note that the spillover of M2 is to the
+    psd_M2_spill = rad_trans(rad_in=psd_M1, medium=psd_sky, eta=eta_M2_spill)
     psd_M2 = rad_trans(rad_in=psd_M2_spill, medium=psd_jn_amb, eta=eta_M2_ohmic)
     psd_wo = rad_trans(rad_in=psd_M2, medium=psd_jn_cabin, eta=eta_wo)
     [psd_window, eta_window] = window_trans(
