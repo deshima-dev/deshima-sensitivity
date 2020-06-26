@@ -23,6 +23,6 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
-        run: poetry run flake8 desim
+        run: poetry run flake8 deshima_sensitivity
       - name: Format with flake8
-        run: poetry run black --check desim
+        run: poetry run black --check deshima_sensitivity
