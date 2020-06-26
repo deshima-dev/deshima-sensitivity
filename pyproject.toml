@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "desim"
-version = "0.1.3"
-description = "Sensitivity calculator for DESHIMA 2.0"
+name = "deshima-sensitivity"
+version = "0.2.0"
+description = "Sensitivity calculator for DESHIMA-type spectrometers"
 license = "MIT"
 authors = [
     "Akira Endo <a.endo@tudelft.nl>",
