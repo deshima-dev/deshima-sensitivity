@@ -1,5 +1,5 @@
 # standard library
-import os
+from pathlib import Path
 from typing import List, Union, Tuple
 
 
@@ -52,7 +52,7 @@ def lineflux(
     f_cii, f_oiii, f_oi = 1900.5369, 3393.00062, 4744.8
 
     z_Dl_df = pd.read_csv(
-        os.path.dirname(__file__) + "/../data/z_Dl.csv",
+        Path(__file__).parent / "data" / "z_Dl.csv",
         skiprows=0,
         delim_whitespace=False,
         header=0,

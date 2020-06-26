@@ -1,9 +1,6 @@
 # standard library
+from pathlib import Path
 from typing import Callable, List, Union
-
-
-# standard library
-import os
 
 
 # dependent packages
@@ -55,7 +52,7 @@ def eta_atm_func(
         F = np.asarray([F])
 
     eta_atm_df = pd.read_csv(
-        os.path.dirname(__file__) + "/../data/atm.csv",
+        Path(__file__).parent / "data" / "atm.csv",
         skiprows=4,
         delim_whitespace=True,
         header=0,
