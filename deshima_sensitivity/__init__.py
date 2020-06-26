@@ -1,5 +1,4 @@
-"""DEshima SIMulator.
-Module for calculating the sensitivity of a DESHIMA-type spectrometer.
+"""Sensitivity calculator for DESHIMA-type spectrometers.
 
 FAQ
 -----
