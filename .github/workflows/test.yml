@@ -24,5 +24,7 @@ jobs:
         run: poetry install
       - name: Lint with flake8
         run: poetry run flake8 deshima_sensitivity
-      - name: Format with flake8
+      - name: Format with black
         run: poetry run black --check deshima_sensitivity
+      - name: Test with pytest
+        run: poetry run pytest
