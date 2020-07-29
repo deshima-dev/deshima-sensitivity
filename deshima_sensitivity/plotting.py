@@ -2,7 +2,6 @@ __all__ = ["MDLF_simple", "MS_simple", "PlotD2HPBW"]
 
 
 # standard library
-import base64
 from typing import List, Union
 
 
@@ -10,7 +9,8 @@ from typing import List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from IPython.display import HTML
+from jupyter_io import savetable_in_notebook
+from jupyter_io.output import HTML
 from .instruments import D2HPBW, eta_mb_ruze
 from .simulator import spectrometer_sensitivity
 
@@ -124,7 +124,7 @@ def MDLF_simple(
     df_download = df_download.join(D2baseline[["MDLF"]])
     df_download = df_download.rename(columns={"MDLF": "MDLF (baseline)"})
 
-    return create_download_link(df_download, filename="MDLF.csv")
+    return savetable_in_notebook(df_download, "MDLF.csv")
 
 
 def MS_simple(F: ArrayLike, pwv: float = 0.5, EL: float = 60.0) -> HTML:
@@ -215,7 +215,7 @@ def MS_simple(F: ArrayLike, pwv: float = 0.5, EL: float = 60.0) -> HTML:
     df_download = df_download.join(D2baseline[["MS"]])
     df_download = df_download.rename(columns={"MS": "MS (baseline)"})
 
-    return create_download_link(df_download, filename="MS.csv")
+    return savetable_in_notebook(df_download, "MS.csv")
 
 
 def PlotD2HPBW() -> HTML:
@@ -252,39 +252,4 @@ def PlotD2HPBW() -> HTML:
     df_download = pd.DataFrame(data=F, columns=["F"])
     df_download["HPBW"] = D2HPBW(F) * 180 * 60 * 60 / np.pi
 
-    return create_download_link(df_download, filename="HPBW.csv")
-
-
-# helper functions
-def create_download_link(
-    df: pd.DataFrame, title: str = "Download CSV file", filename: str = "data.csv"
-) -> HTML:
-    """Create an HTML object for download link of a DataFrame.
-
-    This function convert a DataFrame to a CSV file and create an HTML object
-    object of anchor (a tag) in which the CSV file is embedded as Base64 format.
-    The return HTML object is intended to be used in a Jupyter notebook.
-
-    Parameters
-    ----------
-    df
-        Pandas DataFrame to be embedded in an HTML anchor (a tag).
-    title
-        Text of an HTML anchor.
-    filename
-        Filename of download
-
-    Returns
-    -------
-    html
-        HTML object for download link (to be used in Jupyter notebook).
-
-    """
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode())
-    payload = b64.decode()
-
-    href = f"data:text/csv;base64,{payload}"
-    target = "_blank"
-
-    return HTML(f'<a download="{filename}" href="{href}" target="{target}">{title}</a>')
+    return savetable_in_notebook(df_download, "HPBW.csv")
