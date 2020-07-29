@@ -3,15 +3,15 @@ from deshima_sensitivity import physics
 
 
 def test_johnson_nyquist_psd():
-    expected = 1.3833132 * 10 ** -21
-    output = physics.johnson_nyquist_psd(10, 100)
-    assert output == expected
+    expected = 1.34778 * 10 ** -21
+    output = physics.johnson_nyquist_psd(1e11, 100)
+    assert isclose(output, expected, rel_tol=0.01)
 
 
 def test_nph():
-    expected = 2.0876827 * 10 ** 11
-    output = physics.nph(10, 100)
-    assert output == expected
+    expected = 20.3406
+    output = physics.nph(1e11, 100)
+    assert isclose(output, expected, rel_tol=0.01)
 
 
 def test_T_from_psd():
