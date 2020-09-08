@@ -36,4 +36,4 @@ In the case of running it in a local Python environment, please follow the requi
 
 ```shell
 $ pip install deshima-sensitivity
-``` 
+```
