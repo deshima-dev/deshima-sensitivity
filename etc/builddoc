@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eu
+
+sphinx-apidoc -f -o docs/_apidoc deshima_sensitivity
+sphinx-build docs docs/_build
+sphinx-build docs docs/_build
