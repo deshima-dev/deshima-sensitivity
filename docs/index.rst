@@ -3,9 +3,9 @@ Welcome to deshima-sensitivity's documentation!
 
 .. toctree::
    :hidden:
-   
+
 	Home <self>
-	Package guide <_apidoc/deshima_sensitivity>
+	Package guide <_apidoc/modules>
 
 Indices and tables
 ==================
