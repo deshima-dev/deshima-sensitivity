@@ -33,7 +33,7 @@ def eta_atm_func(
         Telescope elevation angle. Units: degrees.
     R
         Spectral resolving power in F/W_F where W_F is the 'equivalent bandwidth'.
-        R is used to average the atmospheric trannsmission within one spectrometer
+        R is used to average the atmospheric transmission within one spectrometer
         channel. If R = 0, then the function will return the transmission
         at that exact frequency. Units: None.
         See also: http://www.astrosurf.com/buil/us/spe2/hresol7.htm
@@ -109,11 +109,14 @@ def eta_atm_interp(eta_atm_dataframe: pd.DataFrame) -> Callable:
 
     Example
     --------
-        % read csv file with pandas (in e.g., Jupyter)
-        eta_atm_df = pd.read_csv("<desim-folder>/data/atm.csv",skiprows=4,
-                                 delim_whitespace=True,header=0)
-        % make function from pandas file
-        etafun = desim.eta_atm_interp(eta_atm_df)
+        Read csv file with pandas (in e.g., Jupyter)::
+
+            eta_atm_df = pd.read_csv("<desim-folder>/data/atm.csv",skiprows=4,
+                                     delim_whitespace=True,header=0)
+
+        Make function from pandas file::
+
+            etafun = desim.eta_atm_interp(eta_atm_df)
 
     """
     x = np.array(list(eta_atm_dataframe)[1:]).astype(np.float)

@@ -22,10 +22,12 @@ pandas = ">= 0.25, < 1.1"
 jupyter-io = "^0.2"
 
 [tool.poetry.dev-dependencies]
-flake8 = "^3.7"
 black = "^19.10b0"
-pytest = "^5.3"
+flake8 = "^3.8"
 jupyterlab = "^2.0"
+pydata-sphinx-theme = "^0.4"
+pytest = "^6.0"
+sphinx = "^3.2"
 
 [build-system]
 requires = ["poetry>=0.12"]

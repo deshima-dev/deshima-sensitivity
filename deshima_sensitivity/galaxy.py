@@ -88,7 +88,7 @@ def flux_from_line_luminosity(
 ) -> ArrayLike:
     """Calculate line flux from luminosity.
 
-    Paramters
+    Parameters
     ---------
     d_l
         Luminosity distance. Units: Mpc.
