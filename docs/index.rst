@@ -4,8 +4,8 @@ Welcome to deshima-sensitivity's documentation!
 .. toctree::
    :hidden:
 
-	Home <self>
-	Package guide <_apidoc/modules>
+   Home <self>
+   Package guide <_apidoc/modules>
 
 Indices and tables
 ==================

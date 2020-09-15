@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "deshima-sensitivity"
-version = "0.2.3"
+version = "0.2.4"
 description = "Sensitivity calculator for DESHIMA-type spectrometers"
 authors = ["Akira Endo <a.endo@tudelft.nl>"]
 maintainers = [
@@ -8,10 +8,12 @@ maintainers = [
     "Yohei Togami <y.togami@a.phys.nagoya-u.ac.jp>",
     "Keiichi Matsuda <matsuda@a.phys.nagoya-u.ac.jp>",
     "Masato Hagimoto <hagimoto@a.phys.nagoya-u.ac.jp>",
+    "Stefanie Brackenhoff <s.a.brackenhoff@student.tudelft.nl>",
 ]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/deshima-dev/deshima-sensitivity"
+documentation = "https://deshima-dev.github.io/deshima-sensitivity/"
 
 [tool.poetry.dependencies]
 python = "^3.6"
