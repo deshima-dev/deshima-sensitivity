@@ -8,6 +8,7 @@ maintainers = [
     "Yohei Togami <y.togami@a.phys.nagoya-u.ac.jp>",
     "Keiichi Matsuda <matsuda@a.phys.nagoya-u.ac.jp>",
     "Masato Hagimoto <hagimoto@a.phys.nagoya-u.ac.jp>",
+    "Stefanie Brackenhoff <s.a.brackenhoff@student.tudelft.nl>",
 ]
 license = "MIT"
 readme = "README.md"
