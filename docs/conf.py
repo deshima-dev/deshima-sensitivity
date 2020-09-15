@@ -3,6 +3,7 @@
 project = 'deshima-sensitivity'
 copyright = '2020, Akio Taniguchi'
 author = 'Akio Taniguchi'
+release = '0.2.4'
 
 
 # -- APIDOC location ---------------------------------------------------------
