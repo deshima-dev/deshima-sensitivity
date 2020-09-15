@@ -12,6 +12,7 @@ maintainers = [
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/deshima-dev/deshima-sensitivity"
+documentation = "https://deshima-dev.github.io/deshima-sensitivity/"
 
 [tool.poetry.dependencies]
 python = "^3.6"
