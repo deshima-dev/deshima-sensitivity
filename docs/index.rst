@@ -1,15 +1,7 @@
-Welcome to deshima-sensitivity's documentation!
-===============================================
+.. include:: readme.rst
 
 .. toctree::
    :hidden:
 
    Home <self>
-   Package guide <_apidoc/modules>
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   Package guide <_apidoc/deshima_sensitivity>
