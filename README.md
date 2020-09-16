@@ -1,5 +1,3 @@
-![DESHIMA logo](http://deshima.ewi.tudelft.nl/image/deshima_logo.png)
-
 # deshima-sensitivity
 
 [![PyPI](https://img.shields.io/pypi/v/deshima-sensitivity.svg?label=PyPI&style=flat-square)](https://pypi.org/pypi/deshima-sensitivity/)
