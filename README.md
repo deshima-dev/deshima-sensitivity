@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/deshima-sensitivity.svg?label=Python&color=yellow&style=flat-square)](https://pypi.org/pypi/deshima-sensitivity/)
 [![Test](https://img.shields.io/github/workflow/status/deshima-dev/deshima-sensitivity/Test?logo=github&label=Test&style=flat-square)](https://github.com/deshima-dev/deshima-sensitivity/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?label=License&style=flat-square)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.3966839-blue?style=flat-square)](https://doi.org/10.5281/zenodo.3966839)
 
 Sensitivity calculator for DESHIMA-type spectrometers
 
@@ -17,7 +18,7 @@ Click the budge below to open it in [Google colaboratory](http://colab.research.
 
 ### Stable version (recommended)
 
-[![open in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/v0.2.5/sensitivity.ipynb)
+[![open in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/v0.2.6/sensitivity.ipynb)
 
 ### Latest version
 

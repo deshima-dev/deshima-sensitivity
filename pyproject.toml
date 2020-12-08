@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "deshima-sensitivity"
-version = "0.2.5"
+version = "0.2.6"
 description = "Sensitivity calculator for DESHIMA-type spectrometers"
 authors = ["Akira Endo <a.endo@tudelft.nl>"]
 maintainers = [
