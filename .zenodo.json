@@ -1,0 +1,31 @@
+{
+    "creators": [
+        {
+            "name": "Akira Endo",
+            "affiliation": "Delft University of Technology",
+            "orcid": "0000-0003-0379-2341"
+        },
+        {
+            "name": "Akio Taniguchi",
+            "affiliation": "Nagoya University",
+            "orcid": "0000-0002-9695-6183"
+        },
+        {
+            "name": "Stefanie Anna Brackenhoff",
+            "affiliation": "Delft University of Technology",
+            "orcid": "0000-0001-7507-6948"
+        },
+        {
+            "name": "Yohei Togami",
+            "affiliation": "Nagoya University"
+        },
+        {
+            "name": "Keiichi Matsuda",
+            "affiliation": "Nagoya University"
+        },
+        {
+            "name": "Masato Hagimoto",
+            "affiliation": "Nagoya University"
+        }
+    ]
+}
