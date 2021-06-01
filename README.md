@@ -28,7 +28,7 @@ In the case of running it in a local Python environment, please follow the requi
 
 ## Requirements
 
-- **Python:** 3.6, 3.7, or 3.8 (tested by the authors)
+- **Python:** 3.7, 3.8, or 3.9 (tested by the authors)
 - **Dependencies:** See [pyproject.toml](https://github.com/deshima-dev/deshima-sensitivity/blob/master/pyproject.toml)
 
 ## Installation
