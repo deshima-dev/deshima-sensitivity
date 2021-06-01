@@ -1,11 +1,13 @@
-name: Publish
+name: PyPI
 
 on:
   release:
-    types: [created]
+    types:
+      - created
 
 jobs:
   publish:
+    name: PyPI
     runs-on: ubuntu-latest
     env:
       USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -13,11 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.8
+      - name: Install dependencies
+        run: pip install poetry
       - name: Publish package
         run: |
-          pip install poetry
           poetry build
           poetry publish --username $USERNAME --password $PASSWORD

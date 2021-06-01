@@ -1,4 +1,4 @@
-name: Test
+name: Tests
 
 on:
   pull_request:
@@ -8,23 +8,28 @@ on:
 
 jobs:
   test:
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
+    env:
+        TESTED_DIRS: deshima_sensitivity docs tests
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install poetry
-        run: pip install poetry
       - name: Install dependencies
-        run: poetry install
-      - name: Lint with flake8
-        run: poetry run flake8 deshima_sensitivity
-      - name: Format with black
-        run: poetry run black --check deshima_sensitivity
-      - name: Test with pytest
-        run: poetry run pytest
+        run: |
+          pip install poetry
+          poetry install
+      - name: Test code format (Black)
+        run: poetry run black --check ${TESTED_DIRS}
+      - name: Test code style (Flake8)
+        run: poetry run flake8 ${TESTED_DIRS}
+      - name: Test package (pytest)
+        run: poetry run pytest -v tests
+      - name: Test docs building (Sphinx)
+        run: poetry run etc/builddocs
