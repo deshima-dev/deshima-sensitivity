@@ -13,7 +13,7 @@ A.  It is included in the main beam efficiency.
 
 """
 # flake8: noqa
-__version__ = "0.2.7"
+__version__ = "0.3.0"
 
 
 # modules
