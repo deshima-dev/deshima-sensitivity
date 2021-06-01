@@ -23,6 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          sudo apt install pandoc
           pip install poetry
           poetry install
       - name: Test code format (Black)
