@@ -1,6 +1,6 @@
 # Project information
 project = "deshima-sensitivity"
-copyright = "2018-2020 DESHIMA software team"
+copyright = "2020 DESHIMA software team"
 author = "Akira Endo"
 release = "0.3.0"
 
