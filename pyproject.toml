@@ -22,6 +22,7 @@ numpy = "^1.19"
 scipy = "^1.4"
 pandas = "^1.1"
 jupyter-io = "^0.2"
+lmfit = "^1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.5b"

@@ -12,6 +12,7 @@ from .atmosphere import eta_atm_func
 from .instruments import eta_Al_ohmic_850, photon_NEP_kid, window_trans
 from .physics import johnson_nyquist_psd, rad_trans, T_from_psd
 from .physics import c, h, k
+from .filter import eta_filter_lorentzian, eta_filter_csv, weighted_average
 
 
 # type aliases
@@ -20,10 +21,13 @@ ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
 
 # main functions
 def spectrometer_sensitivity(
+    filter_transmission_csv: str = "",
     F: ArrayLike = 350.0e9,
+    R: float = 500.0,
+    F_res: int = 30,
+    overflow: int = 10,
     pwv: float = 0.5,
     EL: float = 60.0,
-    R: float = 500.0,
     eta_M1_spill: ArrayLike = 0.99,
     eta_M2_spill: ArrayLike = 0.90,
     eta_wo_spill: ArrayLike = 0.99,
@@ -55,15 +59,30 @@ def spectrometer_sensitivity(
 
     Parameters
     ----------
+    filter_transmission_csv
+        Optional. File location of a .csv file with transmission for filter channels
+        Header: Frequencies
+        rows: filter channels with transmission per column frequency
     F
+        Used when filter_transmission_csv isn't used.
         Frequency of the astronomical signal. Units: Hz.
+    R
+        Used when filter_transmission_csv isn't used.
+        Spectral resolving power in F/W_F where W_F is equivalent bandwidth and HWHM
+        of filters.
+        Units: None. See also: http://www.astrosurf.com/buil/us/spe2/hresol7.htm
+    F_res
+        Used when filter_transmission_csv isn't used.
+        number of bins per frequency
+        Units: none.
+    Overflow
+        Used when filter_transmission_csv isn't used.
+        The amount of extra spacing below the first and above the last channel
+        Units: none.
     pwv
         Precipitable water vapour. Units: mm.
     EL
         Telescope elevation angle. Units: degrees.
-    R
-        Spectral resolving power in F/W_F where W_F is equivalent bandwidth.
-        Units: None. See also: http://www.astrosurf.com/buil/us/spe2/hresol7.htm
     eta_M1_spill
         Spillover efficiency at the telescope primary mirror. Units: None.
     eta_M2_spill
@@ -136,7 +155,8 @@ def spectrometer_sensitivity(
     Returns
     ----------
     F
-        Same as input.
+        Frequencies from filter_transmission_csv. Units: Hz.
+        Same as input if filter_transmission_csv isn't used.
     pwv
         Same as input.
     EL
@@ -170,7 +190,8 @@ def spectrometer_sensitivity(
         Instrument optical efficiency. Units: None.
         See also: https://arxiv.org/abs/1901.06934
     eta_circuit
-        Same as input.
+        Maximum transmission per channel from filter_transmission_csv. Units: None.
+        Same as input if filter_transmission_csv isn't used.
     Tb_sky
         Planck brightness temperature of the sky. Units: K.
     Tb_M1
@@ -227,12 +248,26 @@ def spectrometer_sensitivity(
     is hard-coded in the function window_trans().
 
     """
-    # Equivalent Bandwidth of 1 channel.
+    # Filter approximation or read from csv?
+    if filter_transmission_csv == "":
+        # Generate filter
+        eta_filter, F, F_int, W_F_int, box_height, box_width = eta_filter_lorentzian(
+            F, F / R, eta_circuit, F_res, overflow
+        )
+    else:
+        # Read from csv
+        eta_filter, F, F_int, W_F_int, box_height, box_width = eta_filter_csv(
+            filter_transmission_csv
+        )
+
+    # Equivalent Bandwidth of 1 channel, modelled as a box filter.
     # Used for calculating loading and coupling to a continuum source
-    W_F_cont = F / R / eta_IBF
+    W_F_cont = box_width
     # Used for calculating coupling to a line source,
     # with a linewidth not wider than the filter channel
-    W_F_spec = F / R
+    W_F_spec = box_width * eta_IBF
+    # Efficiency of filter channels
+    eta_circuit = box_height
 
     # #############################################################
     # 1. Calculating loading power absorbed by the KID, and the NEP
@@ -243,14 +278,13 @@ def spectrometer_sensitivity(
     # .......................................................
 
     # Ohmic loss as a function of frequency, from skin effect scaling
-    eta_Al_ohmic = 1.0 - (1.0 - eta_Al_ohmic_850) * np.sqrt(F / 850.0e9)
+    eta_Al_ohmic = 1.0 - (1.0 - eta_Al_ohmic_850) * np.sqrt(F_int / 850.0e9)
     eta_M1_ohmic = eta_Al_ohmic
     eta_M2_ohmic = eta_Al_ohmic
 
     # Collect efficiencies at the same temperature
     eta_M1 = eta_M1_ohmic * eta_M1_spill
     eta_wo = eta_Al_ohmic ** n_wo_mirrors * eta_wo_spill
-    eta_chip = eta_lens_antenna_rad * eta_circuit
 
     # Forward efficiency: does/should not include window loss
     # because it is defined as how much power out of
@@ -259,17 +293,17 @@ def spectrometer_sensitivity(
         eta_M1 * eta_M2_ohmic * eta_M2_spill * eta_wo + (1.0 - eta_M2_spill) * eta_wo
     )
 
-    # Calcuate eta. scalar/vector depending on F.
-    eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
+    # Calcuate eta at center of integration bin
+    eta_atm = eta_atm_func(F=F_int, pwv=pwv, EL=EL)
 
     # Johnson-Nyquist Power Spectral Density (W/Hz)
     # for the physical temperatures of each stage
 
-    psd_jn_cmb = johnson_nyquist_psd(F=F, T=Tb_cmb)
-    psd_jn_amb = johnson_nyquist_psd(F=F, T=Tp_amb)
-    psd_jn_cabin = johnson_nyquist_psd(F=F, T=Tp_cabin)
-    psd_jn_co = johnson_nyquist_psd(F=F, T=Tp_co)
-    psd_jn_chip = johnson_nyquist_psd(F=F, T=Tp_chip)
+    psd_jn_cmb = johnson_nyquist_psd(F=F_int, T=Tb_cmb)
+    psd_jn_amb = johnson_nyquist_psd(F=F_int, T=Tp_amb)
+    psd_jn_cabin = johnson_nyquist_psd(F=F_int, T=Tp_cabin)
+    psd_jn_co = johnson_nyquist_psd(F=F_int, T=Tp_co)
+    psd_jn_chip = johnson_nyquist_psd(F=F_int, T=Tp_chip)
 
     # Optical Chain
     # Sequentially calculate the Power Spectral Density (W/Hz) at each stage.
@@ -281,29 +315,48 @@ def spectrometer_sensitivity(
     psd_M2_spill = rad_trans(rad_in=psd_M2, medium=psd_sky, eta=eta_M2_spill)
     psd_wo = rad_trans(rad_in=psd_M2_spill, medium=psd_jn_cabin, eta=eta_wo)
     [psd_window, eta_window] = window_trans(
-        F=F,
+        F=F_int,
         psd_in=psd_wo,
         psd_cabin=psd_jn_cabin,
         psd_co=psd_jn_co,
         window_AR=window_AR,
     )
     psd_co = rad_trans(rad_in=psd_window, medium=psd_jn_co, eta=eta_co)
-    psd_KID = rad_trans(
-        rad_in=psd_co, medium=psd_jn_chip, eta=eta_chip
+    psd_filter = rad_trans(
+        rad_in=psd_co, medium=psd_jn_chip, eta=eta_lens_antenna_rad
     )  # PSD absorbed by KID
 
     # Instrument optical efficiency as in JATIS 2019
     # (eta_inst can be calculated only after calculating eta_window)
-    eta_inst = eta_chip * eta_co * eta_window
+    eta_inst = (
+        eta_lens_antenna_rad
+        * eta_co
+        * box_height
+        * weighted_average(eta_window, eta_filter)
+    )
 
     # Calculating Sky loading, Warm loading and Cold loading individually for reference
     # (Not required for calculating Pkid, but serves as a consistency check.)
     # .................................................................................
 
     # Sky loading
-    psd_KID_sky_1 = psd_sky * eta_M1 * eta_M2_spill * eta_M2_ohmic * eta_wo * eta_inst
+    psd_KID_sky_1 = (
+        psd_sky
+        * eta_M1
+        * eta_M2_spill
+        * eta_M2_ohmic
+        * eta_wo
+        * eta_lens_antenna_rad
+        * eta_co
+        * eta_window
+    )
     psd_KID_sky_2 = (
-        rad_trans(0, psd_sky, eta_M2_spill) * eta_M2_ohmic * eta_wo * eta_inst
+        rad_trans(0, psd_sky, eta_M2_spill)
+        * eta_M2_ohmic
+        * eta_wo
+        * eta_lens_antenna_rad
+        * eta_co
+        * eta_window
     )
     psd_KID_sky = psd_KID_sky_1 + psd_KID_sky_2
 
@@ -312,7 +365,7 @@ def spectrometer_sensitivity(
     # Warm loading
     psd_KID_warm = (
         window_trans(
-            F=F,
+            F=F_int,
             psd_in=rad_trans(
                 rad_trans(
                     rad_trans(
@@ -329,38 +382,50 @@ def spectrometer_sensitivity(
             window_AR=window_AR,
         )[0]
         * eta_co
-        * eta_chip
+        * eta_lens_antenna_rad
     )
 
     # Cold loading
     psd_KID_cold = rad_trans(
         rad_trans(
             window_trans(
-                F=F, psd_in=0.0, psd_cabin=0.0, psd_co=psd_jn_co, window_AR=window_AR
+                F=F_int,
+                psd_in=0.0,
+                psd_cabin=0.0,
+                psd_co=psd_jn_co,
+                window_AR=window_AR,
             )[0],
             psd_jn_co,
             eta_co,
         ),
         psd_jn_chip,
-        eta_chip,
+        eta_lens_antenna_rad,
     )
 
     # Loadig power absorbed by the KID
     # .............................................
 
-    Pkid = psd_KID * W_F_cont
-    Pkid_sky = psd_KID_sky * W_F_cont
-    Pkid_warm = psd_KID_warm * W_F_cont
-    Pkid_cold = psd_KID_cold * W_F_cont
+    """ if filter_transmission_csv == "":
+        # Calcualte losses in the filter
+        psd_filter = rad_trans(rad_in=psd_filter, medium=psd_jn_chip, eta=eta_circuit)
+    """
 
-    # if np.all(Pkid != Pkid_sky + Pkid_warm + Pkid_cold):
-    #     print("WARNING: Pkid != Pkid_sky + Pkid_warm + Pkid_cold")
+    """ if np.all(psd_filter != psd_KID_sky + psd_KID_warm + psd_KID_cold):
+        print("WARNING: psd_filter != psd_KID_sky + psd_KID_warm + psd_KID_cold")
+    """
+
+    psd_KID = eta_filter * psd_filter
+    P_kid_binned = psd_KID * W_F_int
+    Pkid = np.sum(P_kid_binned, axis=1)
+
+    Pkid_sky = np.sum(psd_KID_sky * psd_filter * W_F_int, axis=1)
+    Pkid_warm = np.sum(psd_KID_warm * psd_filter * W_F_int, axis=1)
+    Pkid_cold = np.sum(psd_KID_cold * psd_filter * W_F_int, axis=1)
 
     # Photon + R(ecombination) NEP of the KID
     # .............................................
 
-    NEPkid = photon_NEP_kid(F, Pkid, W_F_cont) * KID_excess_noise_factor
-
+    NEPkid = photon_NEP_kid(F_int, P_kid_binned, W_F_int) * KID_excess_noise_factor
     # Instrument NEP as in JATIS 2019
     # .............................................
 
@@ -376,7 +441,7 @@ def spectrometer_sensitivity(
     Ag = np.pi * (telescope_diameter / 2.0) ** 2.0  # Geometric area of the telescope
     omega_mb = np.pi * theta_maj * theta_min / np.log(2) / 4  # Main beam solid angle
     omega_a = omega_mb / eta_mb  # beam solid angle
-    Ae = (c / F) ** 2 / omega_a  # Effective Aperture (m^2): lambda^2 / omega_a
+    Ae = (c / F_int) ** 2 / omega_a  # Effective Aperture (m^2): lambda^2 / omega_a
     eta_a = Ae / Ag  # Aperture efficiency
 
     # Coupling from the "S"ource to outside of "W"indow
@@ -386,7 +451,9 @@ def spectrometer_sensitivity(
     # NESP: Noise Equivalent Source Power (an intermediate quantitiy)
     # .........................................................
 
-    NESP = NEPinst / eta_sw  # Noise equivalnet source power
+    NESP = NEPinst / weighted_average(
+        eta_sw, eta_filter
+    )  # Noise equivalnet source power
 
     # NEF: Noise Equivalent Flux (an intermediate quantitiy)
     # .........................................................
@@ -412,8 +479,8 @@ def spectrometer_sensitivity(
     # NEFD (Noise Equivalent Flux Density)
     # .........................................................
 
-    spectral_NEFD = NEF / W_F_spec
-    continuum_NEFD = NEF / W_F_cont  # = spectral_NEFD * eta_IBF < spectral_NEFD
+    continuum_NEFD = NEF / W_F_cont
+    spectral_NEFD = NEF / W_F_spec  # = continuum_NEFD / eta_IBF > spectral_NEFD
 
     # Mapping Speed (line, 1 channel) (arcmin^2 mJy^-2 h^-1)
     # .........................................................
@@ -450,17 +517,18 @@ def spectrometer_sensitivity(
             pd.Series(eta_a, name="eta_a"),
             pd.Series(eta_mb, name="eta_mb"),
             pd.Series(eta_forward, name="eta_forward"),
-            pd.Series(eta_sw, name="eta_sw"),
+            pd.Series(weighted_average(eta_sw, eta_filter), name="eta_sw"),
             pd.Series(eta_window, name="eta_window"),
             pd.Series(eta_inst, name="eta_inst"),
-            pd.Series(eta_circuit, name="eta_circuit"),
-            pd.Series(T_from_psd(F, psd_sky), name="Tb_sky"),
-            pd.Series(T_from_psd(F, psd_M1), name="Tb_M1"),
-            pd.Series(T_from_psd(F, psd_M2), name="Tb_M2"),
-            pd.Series(T_from_psd(F, psd_wo), name="Tb_wo"),
-            pd.Series(T_from_psd(F, psd_window), name="Tb_window"),
-            pd.Series(T_from_psd(F, psd_co), name="Tb_co"),
-            pd.Series(T_from_psd(F, psd_KID), name="Tb_KID"),
+            pd.Series(box_width, name="eta_circuit"),
+            pd.Series(T_from_psd(F_int, psd_sky), name="Tb_sky"),
+            pd.Series(T_from_psd(F_int, psd_M1), name="Tb_M1"),
+            pd.Series(T_from_psd(F_int, psd_M2), name="Tb_M2"),
+            pd.Series(T_from_psd(F_int, psd_wo), name="Tb_wo"),
+            pd.Series(T_from_psd(F_int, psd_window), name="Tb_window"),
+            pd.Series(T_from_psd(F_int, psd_co), name="Tb_co"),
+            pd.Series(T_from_psd(F_int, psd_filter), name="Tb_filter"),
+            pd.Series(T_from_psd(F_int, psd_KID), name="Tb_KID"),
             pd.Series(psd_KID, name="psd_KID"),
             pd.Series(Pkid, name="Pkid"),
             pd.Series(Pkid_sky, name="Pkid_sky"),
@@ -487,4 +555,5 @@ def spectrometer_sensitivity(
     )
 
     # Turn Scalar values into vectors
-    return result.fillna(method="ffill")
+    # return result.fillna(method="ffill")
+    return result
