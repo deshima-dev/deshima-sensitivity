@@ -57,17 +57,22 @@ def eta_mb_ruze(F: ArrayLike, LFlimit: float, sigma: float) -> ArrayLike:
     return LFlimit * np.exp(-((4.0 * np.pi * sigma * F / c) ** 2.0))
 
 
-def photon_NEP_kid(F: ArrayLike, Pkid: ArrayLike, W_F: ArrayLike) -> ArrayLike:
+def photon_NEP_kid(
+    F: ArrayLike, P_kid_binned: np.ndarray, W_F_int: ArrayLike
+) -> ArrayLike:
     """NEP of the KID, with respect to the absorbed power.
 
     Parameters
     -----------
     F
-        Frequency of the signal responsible for loading. Units: Hz.
-    Pkid
-        Power absorbed by the KID. Units: W.
-    W_F
-        Detection bandwidth, with respect to the power that sets the loading. Units: Hz.
+        Integration frequencies of the signal responsible for loading. Units: Hz.
+    P_kid_binned
+        m x n matrix of the power absorbed by the KID
+        m: the number of integration bins.
+        n: the number of filter channels.
+        Units: W.
+    W_F_int
+        Integration bandwidth, with respect to the power that sets the loading. Units: Hz.
 
     Returns
     -------
@@ -79,10 +84,12 @@ def photon_NEP_kid(F: ArrayLike, Pkid: ArrayLike, W_F: ArrayLike) -> ArrayLike:
     Pkid/(W_F * h * F) gives the occupation number.
 
     """
+
     # photon_term = 2 * Pkid * (h*F + Pkid/W_F)
-    poisson_term = 2 * Pkid * h * F
-    bunching_term = 2 * Pkid * Pkid / W_F
-    r_term = 4 * Delta_Al * Pkid / eta_pb
+    poisson_term = np.sum(2 * P_kid_binned * h * F, axis=1)
+    bunching_term = np.sum(2 * P_kid_binned * P_kid_binned / W_F_int, axis=1)
+    r_term = 4 * Delta_Al * np.sum(P_kid_binned, axis=1) / eta_pb
+
     return np.sqrt(poisson_term + bunching_term + r_term)
 
 
