@@ -15,10 +15,10 @@ ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
 # main functions
 def eta_filter_lorentzian(
     F: ArrayLike,
-    HWHM: ArrayLike,
-    eta_filter: ArrayLike = 1,
+    FWHM: ArrayLike,
+    eta_circuit: ArrayLike = 1,
     F_res: int = 30,
-    overflow: int = 10,
+    overflow: int = 40,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, ArrayLike, ArrayLike]:
     """Calculate the filter transmissions as a matrix of
         Lorentzian approximations. Also calculates approximating box filter
@@ -28,18 +28,17 @@ def eta_filter_lorentzian(
     F
         Center frequency of the filter channels.
         Units: Hz (works also for GHz, will detect)
-    HWHM
+    FWHM
         Full width at half maximum of the filter channels.
-        For a Lorentzian this is equal to twice the scale.
         Units: same as F.
-    eta_filter
-        Efficiency at center frequency as a float or as a vector for each channel
+    eta_circuit
+        Average transmission over the FWHM. Equal to pi/4 times the peak transmission
         Units: none.
     F_res
         The number of frequency bins per channel
         Units: none.
     Overflow
-        The amount of extra spacing below the first and above the last channel
+        The number of extra FWHM spacing below the first and above the last channel
         Units: none.
 
 
@@ -57,7 +56,7 @@ def eta_filter_lorentzian(
         Integration bandwith bins.
         Units: Hz.
     box_height
-        The height the box-filter approximation.
+        The transmission of the box-filter approximation.
         Units: none.
     box-width
         The bandwidth of the box-filter approximation.
@@ -66,16 +65,20 @@ def eta_filter_lorentzian(
 
     if np.average(F) < 10.0 ** 9:
         F = F * 10.0 ** 9
-        HWHM = HWHM * 10.0 ** 9
+        FWHM = FWHM * 10.0 ** 9
 
-    F_int, W_F_int = expand_F(F, F / HWHM, F_res, overflow)
+    F_int, W_F_int = expand_F(F, F / FWHM, F_res, overflow)
 
     eta_filter = (
-        eta_filter * (cauchy.pdf(F_int[np.newaxis].T, F, HWHM) * HWHM * np.pi).T
+        eta_circuit
+        * 4
+        / np.pi
+        * (cauchy.pdf(F_int[np.newaxis].T, F, FWHM / 2) * FWHM / 2 * np.pi).T
     )
 
-    box_height = eta_filter
-    box_width = 2 * HWHM
+    # Equivalent in-band box filter approximation
+    box_height = eta_circuit
+    box_width = FWHM
 
     return eta_filter, F, F_int, W_F_int, box_height, box_width
 
@@ -106,7 +109,7 @@ def eta_filter_csv(
     F_W_int
         The integration bandwith. units: Hz.
     box_height
-        The height the box-filter approximation.
+        The transmission of the box-filter approximation.
         Units: none.
     box-width
         The bandwidth of the box-filter approximation.
@@ -134,9 +137,6 @@ def eta_filter_csv(
     # Extract values
     F = eta_filter_df["Center"].astype(float)
 
-    box_height = eta_filter_df["max height"].astype(float)
-    box_width = 2 * eta_filter_df["HWHM"].astype(float)
-
     # Make filter matrix
     eta_filter = eta_filter_df.to_numpy()[:, :-3]
 
@@ -144,6 +144,10 @@ def eta_filter_csv(
     W_F_int = np.copy(F_int)
     W_F_int[0:-2] = F_int[1:-1] - F_int[0:-2]
     W_F_int[-2] = W_F_int[-3]
+
+    # Equivalent in-band box filter approximation
+    box_height = np.pi / 4 * eta_filter_df["max height"].astype(float)
+    box_width = 2 * eta_filter_df["HWHM"].astype(float)
 
     return eta_filter, F, F_int, W_F_int, box_height, box_width
 
@@ -261,7 +265,7 @@ def fit_lorentzian(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     model = LorentzianModel()
 
     center_guess = x[y.argmax()]
-    HWHM_guess = x[y.argmax()] / 500
+    HWHM_guess = x[y.argmax()] / 1000
 
     params = model.make_params(
         amplitude=y.max() * np.pi * HWHM_guess, center=center_guess, sigma=HWHM_guess
