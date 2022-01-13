@@ -207,10 +207,8 @@ def spectrometer_sensitivity(
         Planck brightness temperature looking into the window. Units: K.
     Tb_co
         Planck brightness temperature looking into the cold optis. Units: K.
-    Tb_KID
+    Tb_filter
         Planck brightness temperature looking into the lens from the filter. Units: K.
-    Tb_KID
-        Planck brightness temperature looking into the filter from the KID. Units: K.
     Pkid
         Power absorbed by the KID. Units: W.
     Pkid_sky
@@ -334,7 +332,6 @@ def spectrometer_sensitivity(
     )
     psd_co = rad_trans(rad_in=psd_window, medium=psd_jn_co, eta=eta_co)
     psd_filter = rad_trans(rad_in=psd_co, medium=psd_jn_chip, eta=eta_lens_antenna_rad)
-    psd_KID = psd_filter * eta_circuit  # PSD absorbed by KID
 
     # Instrument optical efficiency as in JATIS 2019
     # (eta_inst can be calculated only after calculating eta_window)
@@ -552,9 +549,6 @@ def spectrometer_sensitivity(
             pd.Series(
                 weighted_average(T_from_psd(F_int, psd_filter), eta_filter),
                 name="Tb_filter",
-            ),
-            pd.Series(
-                weighted_average(T_from_psd(F_int, psd_KID), eta_filter), name="Tb_KID"
             ),
             pd.Series(Pkid, name="Pkid"),
             pd.Series(Pkid_sky, name="Pkid_sky"),
