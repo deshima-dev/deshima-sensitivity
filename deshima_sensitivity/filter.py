@@ -18,7 +18,7 @@ def eta_filter_lorentzian(
     FWHM: ArrayLike,
     eta_circuit: ArrayLike = 1,
     F_res: int = 30,
-    overflow: int = 40,
+    overflow: int = 80,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, ArrayLike, ArrayLike]:
     """Calculate the filter transmissions as a matrix of
         Lorentzian approximations. Also calculates approximating box filter
@@ -67,7 +67,7 @@ def eta_filter_lorentzian(
         F = F * 10.0 ** 9
         FWHM = FWHM * 10.0 ** 9
 
-    F_int, W_F_int = expand_F(F, F / FWHM, F_res, overflow)
+    F_int, W_F_int = expand_F(F, FWHM, F_res, overflow)
 
     eta_filter = (
         eta_circuit
@@ -183,9 +183,9 @@ def weighted_average(var: ArrayLike, eta_filter: np.ndarray) -> ArrayLike:
 # Helper functions
 def expand_F(
     F: ArrayLike,
-    R: ArrayLike,
+    FHWM: ArrayLike,
     F_res: int = 30,
-    overflow: int = 10,
+    overflow: int = 80,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Expands the given channel(s) to create frequency bins over which to integrate.
 
@@ -197,14 +197,14 @@ def expand_F(
     F
         Center Frequency of filter channel
         Units: Hz (works also for GHz, will detect).
-    R
-        Spectral resolving power in F/W_F where W_F is the 'equivalent bandwidth'.
-        Units: none.
+    FHWM
+        The full width at half maximum, given by F/R.
+        Units: same as F.
     F_res
         The number of frequency bins per channel
         Units: none.
     Overflow
-        The amount of extra spacing below the first and above the last channel
+        The amount of extra FHWM's below the first and above the last channel
         Units: none.
     Returns
     -------
@@ -219,6 +219,7 @@ def expand_F(
 
     if np.average(F) < 10.0 ** 9:
         F = F * 10.0 ** 9
+        FHWM = FHWM * 10 ** 9
 
     try:
         # Entered frequency array
@@ -233,7 +234,7 @@ def expand_F(
         )(n)
     except TypeError:
         # Entered a single frequency
-        half_spacing = 2 * F * overflow / R
+        half_spacing = overflow * FHWM
         F_int = np.linspace(F - half_spacing, F + half_spacing, 2 * overflow * F_res)
 
     # calculate integration bandwith

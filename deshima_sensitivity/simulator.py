@@ -25,7 +25,7 @@ def spectrometer_sensitivity(
     F: ArrayLike = 350.0e9,
     R: float = 500.0,
     F_res: int = 30,
-    overflow: int = 40,
+    overflow: int = 80,
     pwv: float = 0.5,
     EL: float = 60.0,
     eta_M1_spill: ArrayLike = 0.99,
