@@ -162,9 +162,13 @@ def spectrometer_sensitivity(
     EL
         Same as input
     eta_atm
-        Atmospheric transmission. Units: None.
+        Atmospheric transmission within the FHWM of the channel. Units: None.
+    eta_atm_cont
+        Atmospheric transmission across the entire widht of the filter. Units: None.
     R
-        Same as input.
+        best-fit F/FWHM fitted from filter_transmission_csv
+        Equivalent bandwidth within F/R if filter_transmission_csv isn't used.
+        Units: None
     W_F_spec
         Best-fit Equivalent bandwith within the FWHM from filter_transmission_csv
         Equivalent bandwidth within F/R if filter_transmission_csv isn't used.
@@ -182,14 +186,26 @@ def spectrometer_sensitivity(
     eta_mb
         Main beam efficiency. Units: None.
     eta_forward
-        Forward efficiency. Units: None.
+        Forward efficiency within the FHWM of the channel. Units: None.
+        See also: https://deshima.kibe.la/notes/324
+    eta_forward_cont
+        Forward efficiency across the entire widht of the filter. Units: None.
         See also: https://deshima.kibe.la/notes/324
     eta_sw
-        Coupling efficiency from a point source to the cryostat window. Units: None.
+        Coupling efficiency from a spectral point source to the cryostat window. Units: None.
+    eta_sw_cont
+        Coupling efficiency from a continuum point source to the cryostat window. Units: None.
     eta_window
-        Transmission of the cryostat window. Units: None.
+        Transmission of the cryostat window within the FHWM of the channel.
+        Units: None.
+    eta_window_cont
+        Transmission of the cryostat window across the entire widht of the filter.
+        Units: None.
     eta_inst
-        Instrument optical efficiency. Units: None.
+        Instrument optical efficiency within the FHWM of the channel. Units: None.
+        See also: https://arxiv.org/abs/1901.06934
+    eta_inst_cont
+        Instrument optical efficiency across the entire widht of the filter. Units: None.
         See also: https://arxiv.org/abs/1901.06934
     eta_circuit
         Equivalent efficiency of Lorentzian fit from filter_transmission.csv.
@@ -209,6 +225,8 @@ def spectrometer_sensitivity(
         Planck brightness temperature looking into the cold optis. Units: K.
     Tb_filter
         Planck brightness temperature looking into the lens from the filter. Units: K.
+    Tb_KID
+        Planck brightness temperature looking into the filter from the KID. Units: K.
     Pkid
         Power absorbed by the KID. Units: W.
     Pkid_sky
@@ -218,13 +236,19 @@ def spectrometer_sensitivity(
     Pkid_cold
         Power of the cold optics and circuit loading to the KID. Units: W
     n_ph
-        Photon occupation number. Units: None.
+        Photon occupation number within the FHWM of the channel. Units: None.
+        See also: http://adsabs.harvard.edu/abs/1999ASPC..180..671R
+    n_ph_cont
+        Photon occupation number across the entire widht of the filter. Units: None.
         See also: http://adsabs.harvard.edu/abs/1999ASPC..180..671R
     NEPkid
         Noise equivalent power at the KID with respect to the absorbed power.
         Units: W Hz^0.5.
     NEPinst
-        Instrumnet NEP. Units: W Hz^0.5.
+        Instrumnet NEP within within the FHWM of the channel. Units: W Hz^0.5.
+        See also: https://arxiv.org/abs/1901.06934
+    NEPinst_cont
+        Instrumnet NEP across the entire widht of the filter. Units: W Hz^0.5.
         See also: https://arxiv.org/abs/1901.06934
     NEFD_line
         Noise Equivalent Flux Density for couploing to a line that is not wider
@@ -233,7 +257,9 @@ def spectrometer_sensitivity(
         Noise Equivalent Flux Density for couploing to a countinuum source.
         Units: W/m^2/Hz * s^0.5.
     NEF
-        Noise Equivalent Flux. Units: W/m^2 * s^0.5.
+        Noise Equivalent Flux within the FHWM of the channel. Units: W/m^2 * s^0.5.
+    NEF_cont
+        Noise Equivalent Flux across the entire widht of the filter. Units: W/m^2 * s^0.5.
     MDLF
         Minimum Detectable Line Flux. Units: W/m^2.
     MS
@@ -247,8 +273,15 @@ def spectrometer_sensitivity(
     on_source_hours
         Observing hours on source. Units: hours.
     equivalent_Trx
-        Equivalent receiver noise temperature. Units: K.
+        Equivalent receiver noise temperature within the FHWM of the channel. Units: K.
         at the moment this assumes Rayleigh-Jeans!
+    equivalent_Trx_cont
+        Equivalent receiver noise temperature across the entire widht of the filter.
+        Units: K.
+        at the moment this assumes Rayleigh-Jeans!
+    chi_sq
+        The Chi Squared value of the Lorentzian fit from filter_transmission_csv
+        Zero when filter_transmission_csv is not used. Units: None.
 
     Notes
     -----
@@ -259,14 +292,29 @@ def spectrometer_sensitivity(
     # Filter approximation or read from csv?
     if filter_transmission_csv == "":
         # Generate filter
-        eta_filter, F, F_int, W_F_int, box_height, box_width = eta_filter_lorentzian(
-            F, F / R, eta_circuit, F_res, overflow
-        )
+        (
+            eta_filter,
+            eta_inband,
+            F,
+            F_int,
+            W_F_int,
+            box_height,
+            box_width,
+            chi_sq,
+        ) = eta_filter_lorentzian(F, F / R, eta_circuit, F_res, overflow)
+        R = F / box_width
     else:
         # Read from csv
-        eta_filter, F, F_int, W_F_int, box_height, box_width = eta_filter_csv(
-            filter_transmission_csv
-        )
+        (
+            eta_filter,
+            eta_inband,
+            F,
+            F_int,
+            W_F_int,
+            box_height,
+            box_width,
+            chi_sq,
+        ) = eta_filter_csv(filter_transmission_csv)
 
     # Equivalent Bandwidth of 1 channel, modelled as a box filter.
     # Used for calculating loading and coupling to a continuum source
@@ -297,7 +345,12 @@ def spectrometer_sensitivity(
     # Forward efficiency: does/should not include window loss
     # because it is defined as how much power out of
     # the crystat window couples to the cold sky.
-    eta_forward = weighted_average(
+    eta_forward_spec = weighted_average(
+        eta_M1 * eta_M2_ohmic * eta_M2_spill * eta_wo + (1.0 - eta_M2_spill) * eta_wo,
+        eta_inband,
+    )
+
+    eta_forward_cont = weighted_average(
         eta_M1 * eta_M2_ohmic * eta_M2_spill * eta_wo + (1.0 - eta_M2_spill) * eta_wo,
         eta_filter,
     )
@@ -335,7 +388,14 @@ def spectrometer_sensitivity(
 
     # Instrument optical efficiency as in JATIS 2019
     # (eta_inst can be calculated only after calculating eta_window)
-    eta_inst = (
+    eta_inst_spec = (
+        eta_lens_antenna_rad
+        * eta_co
+        * eta_circuit
+        * weighted_average(eta_window, eta_inband)
+    )
+
+    eta_inst_cont = (
         eta_lens_antenna_rad
         * eta_co
         * eta_circuit
@@ -426,6 +486,8 @@ def spectrometer_sensitivity(
 
     # Photon + R(ecombination) NEP of the KID
     # .............................................
+    n_ph_spec = weighted_average(psd_filter / (h * F_int), eta_inband) * eta_circuit
+    n_ph_cont = weighted_average(psd_filter / (h * F_int), eta_filter) * eta_circuit
 
     NEPkid = (
         photon_NEP_kid(F_int, psd_filter * W_F_int * eta_filter, W_F_int)
@@ -434,7 +496,8 @@ def spectrometer_sensitivity(
     # Instrument NEP as in JATIS 2019
     # .............................................
 
-    NEPinst = NEPkid / eta_inst  # Instrument NEP
+    NEPinst_spec = NEPkid / eta_inst_spec  # Instrument NEP
+    NEPinst_cont = NEPkid / eta_inst_cont  # Instrument NEP
 
     # ##############################################################
     # 2. Calculating source coupling and sensitivtiy (MDLF and NEFD)
@@ -451,13 +514,20 @@ def spectrometer_sensitivity(
 
     # Coupling from the "S"ource to outside of "W"indow
     eta_pol = 0.5  # Instrument is single polarization
-    eta_atm_channel = weighted_average(eta_atm, eta_filter)
-    eta_sw = eta_pol * eta_a * eta_forward * eta_atm_channel  # Source-Window coupling
+    eta_atm_spec = weighted_average(eta_atm, eta_inband)
+    eta_atm_cont = weighted_average(eta_atm, eta_filter)
+    eta_sw_spec = (
+        eta_pol * eta_a * eta_forward_spec * eta_atm_spec
+    )  # Source-Window coupling
+    eta_sw_cont = (
+        eta_pol * eta_a * eta_forward_cont * eta_atm_cont
+    )  # Source-Window coupling
 
     # NESP: Noise Equivalent Source Power (an intermediate quantitiy)
     # .........................................................
 
-    NESP = NEPinst / eta_sw  # Noise equivalnet source power
+    NESP_spec = NEPinst_spec / eta_sw_spec  # Noise equivalnet source power
+    NESP_cont = NEPinst_cont / eta_sw_cont  # Noise equivalnet source power
 
     # NEF: Noise Equivalent Flux (an intermediate quantitiy)
     # .........................................................
@@ -465,26 +535,28 @@ def spectrometer_sensitivity(
     # From this point, units change from Hz^-0.5 to t^0.5
     # sqrt(2) is because NEP is defined for 0.5 s integration.
 
-    NEF = NESP / Ag / np.sqrt(2)  # Noise equivalent flux
+    NEF_spec = NESP_spec / Ag / np.sqrt(2)  # Noise equivalent flux
+    NEF_cont = NESP_cont / Ag / np.sqrt(2)  # Noise equivalent flux
 
     # If the observation is involves ON-OFF sky subtraction,
     # Subtraction of two noisy sources results in sqrt(2) increase in noise.
 
     if on_off:
-        NEF = np.sqrt(2) * NEF
+        NEF_spec = np.sqrt(2) * NEF_spec
+        NEF_cont = np.sqrt(2) * NEF_cont
 
     # MDLF (Minimum Detectable Line Flux)
     # .........................................................
 
     # Note that eta_IBF does not matter for MDLF because it is flux.
 
-    MDLF = NEF * snr / np.sqrt(obs_hours * on_source_fraction * 60.0 * 60.0)
+    MDLF = NEF_spec * snr / np.sqrt(obs_hours * on_source_fraction * 60.0 * 60.0)
 
     # NEFD (Noise Equivalent Flux Density)
     # .........................................................
 
-    continuum_NEFD = NEF / W_F_cont
-    spectral_NEFD = NEF / W_F_spec  # = continuum_NEFD / eta_IBF > spectral_NEFD
+    continuum_NEFD = NEF_cont / W_F_cont
+    spectral_NEFD = NEF_spec / W_F_spec  # = continuum_NEFD / eta_IBF > spectral_NEFD
 
     # Mapping Speed (line, 1 channel) (arcmin^2 mJy^-2 h^-1)
     # .........................................................
@@ -501,7 +573,11 @@ def spectrometer_sensitivity(
     # Equivalent Trx
     # .........................................................
 
-    Trx = NEPinst / k / np.sqrt(2 * W_F_cont) - T_from_psd(
+    Trx_spec = NEPinst_spec / k / np.sqrt(2 * W_F_cont) - T_from_psd(
+        F, weighted_average(psd_wo, eta_inband)
+    )  # assumes RJ!
+
+    Trx_cont = NEPinst_spec / k / np.sqrt(2 * W_F_cont) - T_from_psd(
         F, weighted_average(psd_wo, eta_filter)
     )  # assumes RJ!
 
@@ -514,7 +590,8 @@ def spectrometer_sensitivity(
             pd.Series(F, name="F"),
             pd.Series(pwv, name="PWV"),
             pd.Series(EL, name="EL"),
-            pd.Series(eta_atm_channel, name="eta_atm"),
+            pd.Series(eta_atm_spec, name="eta_atm"),
+            pd.Series(eta_atm_cont, name="eta_atm_cont"),
             pd.Series(R, name="R"),
             pd.Series(W_F_spec, name="W_F_spec"),
             pd.Series(W_F_cont, name="W_F_cont"),
@@ -522,10 +599,14 @@ def spectrometer_sensitivity(
             pd.Series(theta_min, name="theta_min"),
             pd.Series(eta_a, name="eta_a"),
             pd.Series(eta_mb, name="eta_mb"),
-            pd.Series(eta_forward, name="eta_forward"),
-            pd.Series(eta_sw, name="eta_sw"),
-            pd.Series(weighted_average(eta_window, eta_filter), name="eta_window"),
-            pd.Series(eta_inst, name="eta_inst"),
+            pd.Series(eta_forward_spec, name="eta_forward"),
+            pd.Series(eta_forward_cont, name="eta_forward_cont"),
+            pd.Series(eta_sw_spec, name="eta_sw"),
+            pd.Series(eta_sw_cont, name="eta_sw_cont"),
+            pd.Series(weighted_average(eta_window, eta_inband), name="eta_window"),
+            pd.Series(weighted_average(eta_window, eta_filter), name="eta_window_cont"),
+            pd.Series(eta_inst_spec, name="eta_inst"),
+            pd.Series(eta_inst_cont, name="eta_inst_cont"),
             pd.Series(eta_circuit, name="eta_circuit"),
             pd.Series(
                 weighted_average(T_from_psd(F_int, psd_sky), eta_filter), name="Tb_sky"
@@ -550,26 +631,38 @@ def spectrometer_sensitivity(
                 weighted_average(T_from_psd(F_int, psd_filter), eta_filter),
                 name="Tb_filter",
             ),
+            pd.Series(
+                T_from_psd(F, eta_circuit * weighted_average(psd_filter, eta_filter)),
+                name="Tb_KID",
+            ),
             pd.Series(Pkid, name="Pkid"),
             pd.Series(Pkid_sky, name="Pkid_sky"),
             pd.Series(Pkid_warm, name="Pkid_warm"),
             pd.Series(Pkid_cold, name="Pkid_cold"),
-            pd.Series(Pkid / (W_F_cont * h * F), name="n_ph"),
+            pd.Series(n_ph_spec, name="n_ph"),
+            pd.Series(n_ph_cont, name="n_ph_cont"),
             pd.Series(NEPkid, name="NEPkid"),
-            pd.Series(NEPinst, name="NEPinst"),
+            pd.Series(NEPinst_spec, name="NEPinst"),
+            pd.Series(NEPinst_cont, name="NEPinst_cont"),
             pd.Series(spectral_NEFD, name="NEFD_line"),
             pd.Series(continuum_NEFD, name="NEFD_continuum"),
-            pd.Series(NEF, name="NEF"),
+            pd.Series(NEF_spec, name="NEF"),
+            pd.Series(NEF_cont, name="NEF_cont"),
             pd.Series(MDLF, name="MDLF"),
             pd.Series(MS, name="MS"),
             pd.Series(snr, name="snr"),
             pd.Series(obs_hours, name="obs_hours"),
             pd.Series(on_source_fraction, name="on_source_fraction"),
             pd.Series(obs_hours * on_source_fraction, name="on_source_hours"),
-            pd.Series(Trx, name="equivalent_Trx"),
+            pd.Series(Trx_spec, name="equivalent_Trx"),
+            pd.Series(Trx_cont, name="equivalent_Trx_cont"),
             pd.Series(skycoup, name="skycoup"),
-            pd.Series(weighted_average(eta_Al_ohmic, eta_filter), name="eta_Al_ohmic"),
-            # pd.Series(Pkid_warm_jochem, name='Pkid_warm_jochem')
+            pd.Series(weighted_average(eta_Al_ohmic, eta_inband), name="eta_Al_ohmic"),
+            pd.Series(
+                weighted_average(eta_Al_ohmic, eta_filter), name="eta_Al_ohmic_cont"
+            ),
+            pd.Series(chi_sq, name="chi_sq"),
+            # pd.Series(Pkid_warm_jochem, name='Pkid_warm_jochem'),
         ],
         axis=1,
     )

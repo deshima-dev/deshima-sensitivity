@@ -49,6 +49,11 @@ def eta_filter_lorentzian(
         m: the number of integration bins.
         n: the number of filter channels.
         Units: None.
+    eta_inband
+        Whether a frequency is out- (false) or inband (true) as an m x n matrix
+        m: the number of integration bins.
+        n: the number of filter channels.
+        Units: None.
     F_int
         Frequency integration bins.
         Units: Hz.
@@ -57,10 +62,13 @@ def eta_filter_lorentzian(
         Units: Hz.
     box_height
         The transmission of the box-filter approximation.
-        Units: none.
+        Units: None.
     box-width
         The bandwidth of the box-filter approximation.
-        Units: Hz
+        Units: Hz.
+    chi-sq
+        Zero. For compatibility with the .csv fit
+        Units: None.
     """
 
     if np.average(F) < 10.0 ** 9:
@@ -80,7 +88,11 @@ def eta_filter_lorentzian(
     box_height = eta_circuit
     box_width = FWHM
 
-    return eta_filter, F, F_int, W_F_int, box_height, box_width
+    chi_sq = np.zeros(len(F))
+
+    eta_inband = eta_inband_mask(F_int, F, box_width / 2) * eta_filter
+
+    return eta_filter, eta_inband, F, F_int, W_F_int, box_height, box_width, chi_sq
 
 
 def eta_filter_csv(
@@ -102,6 +114,11 @@ def eta_filter_csv(
         m: the number of integration bins.
         n: the number of filter channels.
         Units: None.
+    eta_inband
+        Whether a frequency is out- (false) or inband (true) as an m x n matrix
+        m: the number of integration bins.
+        n: the number of filter channels.
+        Units: None.
     F
         Center frequency of each channel
     F_int
@@ -110,10 +127,13 @@ def eta_filter_csv(
         The integration bandwith. units: Hz.
     box_height
         The transmission of the box-filter approximation.
-        Units: none.
-    box-width
+        Units: None.
+    box_width
         The bandwidth of the box-filter approximation.
         Units: Hz
+    chi_sqr
+        The Chi Square value of the Lorentzian fit.
+        Units: None.
 
     """
     eta_filter_df = pd.read_csv(file, header=0)
@@ -126,7 +146,7 @@ def eta_filter_csv(
 
     # Fit to lorentzian model
     fit = np.apply_along_axis(fit_lorentzian, 1, eta_filter_df.to_numpy(), x=F_int)
-    fit_df = pd.DataFrame(fit, columns=["Center", "HWHM", "max height"])
+    fit_df = pd.DataFrame(fit, columns=["Center", "HWHM", "max height", "chi sq"])
 
     eta_filter_df = eta_filter_df.join(fit_df)
 
@@ -135,10 +155,10 @@ def eta_filter_csv(
     eta_filter_df.set_index(np.arange(0, len(eta_filter_df)), inplace=True)
 
     # Extract values
-    F = eta_filter_df["Center"].astype(float)
+    F = eta_filter_df["Center"].to_numpy(float)
 
     # Make filter matrix
-    eta_filter = eta_filter_df.to_numpy()[:, :-3]
+    eta_filter = eta_filter_df.to_numpy()[:, :-4]
 
     # calculate integration bandwith, copy second-last bin BW to last
     W_F_int = np.copy(F_int)
@@ -146,10 +166,13 @@ def eta_filter_csv(
     W_F_int[-2] = W_F_int[-3]
 
     # Equivalent in-band box filter approximation
-    box_height = np.pi / 4 * eta_filter_df["max height"].astype(float)
-    box_width = 2 * eta_filter_df["HWHM"].astype(float)
+    box_height = np.pi / 4 * eta_filter_df["max height"].to_numpy(float)
+    box_width = 2 * eta_filter_df["HWHM"].to_numpy(float)
+    chi_sq = eta_filter_df["chi sq"].to_numpy(float)
 
-    return eta_filter, F, F_int, W_F_int, box_height, box_width
+    eta_inband = eta_inband_mask(F_int, F, box_width / 2) * eta_filter
+
+    return eta_filter, eta_inband, F, F_int, W_F_int, box_height, box_width, chi_sq
 
 
 def weighted_average(var: ArrayLike, eta_filter: np.ndarray) -> ArrayLike:
@@ -260,8 +283,8 @@ def fit_lorentzian(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     -------
     result_params
        A numpy array of the returning parameters
-       ['Center', 'HWHM', 'max height'].
-       Units: [same as x, same as x, none].
+       ['Center', 'HWHM', 'max height', 'chi sq'].
+       Units: [same as x, same as x, None, None].
     """
     model = LorentzianModel()
 
@@ -272,8 +295,46 @@ def fit_lorentzian(y: np.ndarray, x: np.ndarray) -> np.ndarray:
         amplitude=y.max() * np.pi * HWHM_guess, center=center_guess, sigma=HWHM_guess
     )
 
-    result = model.fit(y, params, x=x).params
+    result = model.fit(y, params, x=x)
     result_params = np.array(
-        [result["center"].value, result["sigma"].value, result["height"].value]
+        [
+            result.params["center"].value,
+            result.params["sigma"].value,
+            result.params["height"].value,
+            result.chisqr,
+        ]
     )
     return result_params
+
+
+def eta_inband_mask(F_int: np.ndarray, F: np.ndarray, HWHM: np.ndarray):
+    """Generates an array to use with weighted_average() that averages over
+    in-band (F +- HWHM) frequencies
+
+    Parameters
+    ----------
+    F_int
+       Frequency bins for integration.
+       units: Hz or GHz.
+    F
+        Center frequencies of channels.
+        units: Same as F_int.
+    HWHM
+        Half width at half maximum of these channels
+        units: Same as F_int.
+
+    Returns
+    -------
+    eta_inband
+        Whether a frequency is out- (false) or inband (true) as an m x n matrix
+        m: the number of integration bins.
+        n: the number of filter channels.
+        Units: None.
+    """
+    F = F[np.newaxis].T
+    HWHM = HWHM[np.newaxis].T
+    F_int = F_int[np.newaxis]
+
+    return np.logical_and(
+        np.greater_equal(F_int, F - HWHM), np.less_equal(F_int, F + HWHM)
+    )

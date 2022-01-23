@@ -58,13 +58,13 @@ def eta_mb_ruze(F: ArrayLike, LFlimit: float, sigma: float) -> ArrayLike:
 
 
 def photon_NEP_kid(
-    F: ArrayLike, P_kid_binned: np.ndarray, W_F_int: ArrayLike
+    F_int: ArrayLike, P_kid_binned: np.ndarray, W_F_int: ArrayLike
 ) -> ArrayLike:
     """NEP of the KID, with respect to the absorbed power.
 
     Parameters
     -----------
-    F
+    F_int
         Integration frequencies of the signal responsible for loading. Units: Hz.
     P_kid_binned
         m x n matrix of the power absorbed by the KID
@@ -86,7 +86,7 @@ def photon_NEP_kid(
     """
 
     # photon_term = 2 * Pkid * (h*F + Pkid/W_F)
-    poisson_term = np.sum(2 * P_kid_binned * h * F, axis=1)
+    poisson_term = np.sum(2 * P_kid_binned * h * F_int, axis=1)
     bunching_term = np.sum(2 * P_kid_binned * P_kid_binned / W_F_int, axis=1)
     r_term = 4 * Delta_Al * np.sum(P_kid_binned, axis=1) / eta_pb
 
