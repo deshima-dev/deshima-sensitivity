@@ -73,11 +73,11 @@ def spectrometer_sensitivity(
         Units: None. See also: http://www.astrosurf.com/buil/us/spe2/hresol7.htm
     F_res
         Used when filter_transmission_csv isn't used.
-        number of bins per frequency
+        The number of frequency bins within a FWHM
         Units: none.
     Overflow
         Used when filter_transmission_csv isn't used.
-        The amount of extra spacing below the first and above the last channel
+        The number of extra FHWM's below the first and above the last channel
         Units: none.
     pwv
         Precipitable water vapour. Units: mm.

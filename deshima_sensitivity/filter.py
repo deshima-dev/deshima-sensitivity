@@ -35,10 +35,10 @@ def eta_filter_lorentzian(
         Average transmission over the FWHM. Equal to pi/4 times the peak transmission
         Units: none.
     F_res
-        The number of frequency bins per channel
+        The number of frequency bins within a FWHM
         Units: none.
     Overflow
-        The number of extra FWHM spacing below the first and above the last channel
+        The number of extra FHWM's below the first and above the last channel
         Units: none.
 
 
@@ -224,10 +224,10 @@ def expand_F(
         The full width at half maximum, given by F/R.
         Units: same as F.
     F_res
-        The number of frequency bins per channel
+        The number of frequency bins within a FWHM
         Units: none.
     Overflow
-        The amount of extra FHWM's below the first and above the last channel
+        The number of extra FHWM's below the first and above the last channel
         Units: none.
     Returns
     -------
