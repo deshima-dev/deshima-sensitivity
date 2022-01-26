@@ -17,12 +17,12 @@ documentation = "https://deshima-dev.github.io/deshima-sensitivity/"
 
 [tool.poetry.dependencies]
 python = ">=3.7.1, <3.10"
-matplotlib = "^3.2"
-numpy = "^1.19"
-scipy = "^1.4"
-pandas = "^1.1"
 jupyter-io = "^0.2"
 lmfit = "^1.0"
+matplotlib = "^3.2"
+numpy = "^1.19"
+pandas = "^1.1"
+scipy = "^1.4"
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b"
@@ -34,5 +34,5 @@ pytest = "^6.2"
 sphinx = "^4.4"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
