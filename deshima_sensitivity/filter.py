@@ -19,7 +19,16 @@ def eta_filter_lorentzian(
     eta_circuit: ArrayLike = 1,
     F_res: int = 30,
     overflow: int = 80,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, ArrayLike, ArrayLike]:
+) -> Tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    ArrayLike,
+    ArrayLike,
+    ArrayLike,
+]:
     """Calculate the filter transmissions as a matrix of
         Lorentzian approximations. Also calculates approximating box filter
 
@@ -75,6 +84,13 @@ def eta_filter_lorentzian(
         F = F * 10.0 ** 9
         FWHM = FWHM * 10.0 ** 9
 
+    # give F a length if it is an integer.
+    if not hasattr(F, "__len__"):
+        F = np.asarray([F])
+    # give FWHM a length if it is an integer.
+    if not hasattr(FWHM, "__len__"):
+        FWHM = np.asarray([FWHM])
+
     F_int, W_F_int = expand_F(F, FWHM, F_res, overflow)
 
     eta_filter = (
@@ -97,7 +113,16 @@ def eta_filter_lorentzian(
 
 def eta_filter_csv(
     file: str,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    ArrayLike,
+    ArrayLike,
+    ArrayLike,
+]:
     """Read filter transmissionsfrom csv and return filter matrix,
     integrationbins and integration bin bandwith
 
@@ -244,9 +269,9 @@ def expand_F(
         F = F * 10.0 ** 9
         FHWM = FHWM * 10 ** 9
 
-    try:
+    N = len(F)
+    if N > 1:
         # Entered frequency array
-        N = len(F)
         n = np.linspace(-overflow, N - 1 + overflow, (N + 2 * overflow) * F_res)
         F_int = interp1d(
             np.arange(N),
@@ -255,7 +280,7 @@ def expand_F(
             fill_value="extrapolate",
             kind="quadratic",
         )(n)
-    except TypeError:
+    else:
         # Entered a single frequency
         half_spacing = overflow * FHWM
         F_int = np.linspace(F - half_spacing, F + half_spacing, 2 * overflow * F_res)
