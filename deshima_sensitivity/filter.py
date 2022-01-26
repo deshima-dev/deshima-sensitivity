@@ -1,5 +1,5 @@
 # standard library
-from typing import List, Union
+from typing import List, Union, Tuple
 
 # dependent packages
 import numpy as np
@@ -19,7 +19,7 @@ def eta_filter_lorentzian(
     eta_circuit: ArrayLike = 1,
     F_res: int = 30,
     overflow: int = 80,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, ArrayLike, ArrayLike]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, ArrayLike, ArrayLike]:
     """Calculate the filter transmissions as a matrix of
         Lorentzian approximations. Also calculates approximating box filter
 
@@ -97,7 +97,7 @@ def eta_filter_lorentzian(
 
 def eta_filter_csv(
     file: str,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Read filter transmissionsfrom csv and return filter matrix,
     integrationbins and integration bin bandwith
 
@@ -209,7 +209,7 @@ def expand_F(
     FHWM: ArrayLike,
     F_res: int = 30,
     overflow: int = 80,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray]:
     """Expands the given channel(s) to create frequency bins over which to integrate.
 
     If a single channel is given the function will expand by 2 * overflow * R
@@ -307,7 +307,7 @@ def fit_lorentzian(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     return result_params
 
 
-def eta_inband_mask(F_int: np.ndarray, F: np.ndarray, HWHM: np.ndarray):
+def eta_inband_mask(F_int: np.ndarray, F: np.ndarray, HWHM: np.ndarray) -> np.ndarray:
     """Generates an array to use with weighted_average() that averages over
     in-band (F +- HWHM) frequencies
 
