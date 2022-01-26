@@ -36,3 +36,19 @@ In the case of running it in a local Python environment, please follow the requi
 ```shell
 $ pip install deshima-sensitivity
 ```
+
+## Development environment
+
+The following steps can create a standalone development environment (VS Code + Python).
+
+1. Install [VS Code] and [Docker Desktop], and launch them
+1. Install the [Remote Containers] extension to VS Code
+1. Clone this repository
+1. Open the repository by VS Code
+1. Choose `Reopen in Container` from the [Command Palette]
+
+[Command Palette]: https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette
+[Docker Desktop]: https://www.docker.com/products/docker-desktop
+[Remote Containers]: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
+[VS Code]: https://code.visualstudio.com
+
