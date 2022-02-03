@@ -80,9 +80,9 @@ def eta_filter_lorentzian(
         Units: None.
     """
 
-    if np.average(F) < 10.0 ** 9:
-        F = F * 10.0 ** 9
-        FWHM = FWHM * 10.0 ** 9
+    if np.average(F) < 10.0**9:
+        F = F * 10.0**9
+        FWHM = FWHM * 10.0**9
 
     # give F a length if it is an integer.
     if not hasattr(F, "__len__"):
@@ -165,8 +165,8 @@ def eta_filter_csv(
 
     F_int = eta_filter_df.columns.values.astype(float)
 
-    if np.average(F_int) < 10.0 ** 9:
-        F_int = F_int * 10.0 ** 9
+    if np.average(F_int) < 10.0**9:
+        F_int = F_int * 10.0**9
         eta_filter_df.columns = F_int
 
     # Fit to lorentzian model
@@ -265,9 +265,9 @@ def expand_F(
 
     """
 
-    if np.average(F) < 10.0 ** 9:
-        F = F * 10.0 ** 9
-        FHWM = FHWM * 10 ** 9
+    if np.average(F) < 10.0**9:
+        F = F * 10.0**9
+        FHWM = FHWM * 10**9
 
     N = len(F)
     if N > 1:

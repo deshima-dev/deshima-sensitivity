@@ -44,8 +44,8 @@ def eta_atm_func(
         Atmospheric tranmsmission. Units: None.
 
     """
-    if np.average(F) > 10.0 ** 9:
-        F = F / 10.0 ** 9
+    if np.average(F) > 10.0**9:
+        F = F / 10.0**9
 
     # give F a length if it is an integer.
     if not hasattr(F, "__len__"):

@@ -104,7 +104,7 @@ def MDLF_simple(
     ax.set_ylabel(r"Minimum Detectable Line Flux ($\mathrm{W\, m^{-2}}$)")
     ax.set_yscale("log")
     ax.set_xlim(200, 460)
-    ax.set_ylim([10 ** -20, 10 ** -17])
+    ax.set_ylim([10**-20, 10**-17])
     ax.tick_params(direction="in", which="both")
     ax.grid(True)
     ax.set_title(
@@ -197,7 +197,7 @@ def MS_simple(F: ArrayLike, pwv: float = 0.5, EL: float = 60.0) -> HTML:
     ax.set_ylabel(r"Mapping Speed ($\mathrm{arcmin^2\, mJy^{-2}\, h^{-1}}$)")
     ax.set_yscale("log")
     ax.set_xlim(200, 460)
-    ax.set_ylim([10 ** -5, 10 ** -2])
+    ax.set_ylim([10**-5, 10**-2])
     ax.tick_params(direction="in", which="both")
     ax.grid(True)
     ax.set_title(
