@@ -22,14 +22,14 @@ Click the budge below to open it in [Google colaboratory](http://colab.research.
 
 ### Latest version
 
-[![open latest version in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/master/sensitivity.ipynb)
+[![open latest version in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/main/sensitivity.ipynb)
 
 In the case of running it in a local Python environment, please follow the requirements and the installation guide below.
 
 ## Requirements
 
 - **Python:** 3.7, 3.8, or 3.9 (tested by the authors)
-- **Dependencies:** See [pyproject.toml](https://github.com/deshima-dev/deshima-sensitivity/blob/master/pyproject.toml)
+- **Dependencies:** See [pyproject.toml](https://github.com/deshima-dev/deshima-sensitivity/blob/main/pyproject.toml)
 
 ## Installation
 
