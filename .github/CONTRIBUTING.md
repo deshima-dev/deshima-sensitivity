@@ -36,7 +36,7 @@ If you write a Python docstring, follow [the NumPy style] so that it is automati
 
 ### Open a Pull Request
 
-When your code is ready, [create a pull request] (PR) to merge with the master branch.
+When your code is ready, [create a pull request] (PR) to merge with the main branch.
 Without special reasons, the title should be the same as that of the issue.
 Please specify the issue ID in the comment form so that it is linked to the PR.
 For example, writing `Closes #31.` at the beginning of the comment would be nice.
@@ -44,7 +44,7 @@ For example, writing `Closes #31.` at the beginning of the comment would be nice
 ### Discuss and review your code
 
 Your code is reviewed by at least one contributor and checked by the automatic status checks by [GitHub Actions].
-After passing them, your code will be merged with the master branch.
+After passing them, your code will be merged with the main branch.
 That's it!
 Thank you for your contribution!
 
@@ -97,14 +97,14 @@ When a [GitHub release] is created, the workflow is triggered and the docs are a
 [Docker Desktop]: https://www.docker.com/products/docker-desktop
 [GitHub Actions]: https://github.com/deshima-dev/deshima-sensitivity/actions
 [Github flow]: https://guides.github.com/introduction/flow/
-[GitHub Pages workflow]: https://github.com/deshima-dev/deshima-sensitivity/blob/master/.github/workflows/gh-pages.yml
+[GitHub Pages workflow]: https://github.com/deshima-dev/deshima-sensitivity/blob/main/.github/workflows/gh-pages.yml
 [GitHub release]: https://github.com/deshima-dev/deshima-sensitivity/releases
 [Poetry]: https://python-poetry.org/
 [PyPI]: https://pypi.org/project/deshima-sensitivity/
-[PyPI workflow]: https://github.com/deshima-dev/deshima-sensitivity/blob/master/.github/workflows/pypi.yml
+[PyPI workflow]: https://github.com/deshima-dev/deshima-sensitivity/blob/main/.github/workflows/pypi.yml
 [pytest]: https://docs.pytest.org/en/stable/
 [Remote Containers]: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
 [Sphinx]: https://www.sphinx-doc.org/en/master/
-[tests workflow]: https://github.com/deshima-dev/deshima-sensitivity/blob/master/.github/workflows/test.yml
+[tests workflow]: https://github.com/deshima-dev/deshima-sensitivity/blob/main/.github/workflows/test.yml
 [the NumPy style]: https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html
 [VS Code]: https://code.visualstudio.com/
