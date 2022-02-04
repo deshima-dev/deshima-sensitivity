@@ -3,7 +3,7 @@ from deshima_sensitivity import physics
 
 
 def test_johnson_nyquist_psd():
-    expected = 1.34778 * 10 ** -21
+    expected = 1.34778 * 10**-21
     output = physics.johnson_nyquist_psd(1e11, 100)
     assert isclose(output, expected, rel_tol=0.01)
 

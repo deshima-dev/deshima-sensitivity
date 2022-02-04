@@ -18,7 +18,7 @@ Click the budge below to open it in [Google colaboratory](http://colab.research.
 
 ### Stable version (recommended)
 
-[![open stable version in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/v0.3.0/sensitivity.ipynb)
+[![open stable version in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/v0.4.0/sensitivity.ipynb)
 
 ### Latest version
 

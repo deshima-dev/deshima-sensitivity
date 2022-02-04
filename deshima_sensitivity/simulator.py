@@ -340,7 +340,7 @@ def spectrometer_sensitivity(
 
     # Collect efficiencies at the same temperature
     eta_M1 = eta_M1_ohmic * eta_M1_spill
-    eta_wo = eta_Al_ohmic ** n_wo_mirrors * eta_wo_spill
+    eta_wo = eta_Al_ohmic**n_wo_mirrors * eta_wo_spill
 
     # Forward efficiency: does/should not include window loss
     # because it is defined as how much power out of

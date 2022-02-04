@@ -114,4 +114,4 @@ def co_luminosity(z, d_l, f_obs, int):
     c2 = 1.04e-03
 
     # Lp  = c1 * int * d_l**2 / (f_obs**2 * (1 + z)**3 )
-    return c2 * int * d_l ** 2 * f_obs
+    return c2 * int * d_l**2 * f_obs

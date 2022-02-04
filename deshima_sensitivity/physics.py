@@ -11,9 +11,9 @@ ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
 
 
 # constants
-h = 6.62607004 * 10 ** -34  # Planck constant
-k = 1.38064852 * 10 ** -23  # Boltzmann constant
-e = 1.60217662 * 10 ** -19  # electron charge
+h = 6.62607004 * 10**-34  # Planck constant
+k = 1.38064852 * 10**-23  # Boltzmann constant
+e = 1.60217662 * 10**-19  # electron charge
 c = 299792458.0  # velocity of light
 
 

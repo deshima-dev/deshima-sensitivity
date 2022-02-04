@@ -12,7 +12,7 @@ ArrayLike = Union[np.ndarray, List[float], List[int], float, int]
 
 
 # constants
-Delta_Al = 188.0 * 10 ** -6 * e  # gap energy of Al
+Delta_Al = 188.0 * 10**-6 * e  # gap energy of Al
 eta_pb = 0.4  # Pair breaking efficiency
 eta_Al_ohmic_850 = 0.9975  # Ohmic loss of an Al surface at 850 GHz.
 # Shitov+, ISSTT2008. https://www.nrao.edu/meetings/isstt/papers/2008/2008263266.pdf
