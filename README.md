@@ -1,10 +1,10 @@
 # deshima-sensitivity
 
-[![PyPI](https://img.shields.io/pypi/v/deshima-sensitivity.svg?label=PyPI&style=flat-square)](https://pypi.org/pypi/deshima-sensitivity/)
-[![Python](https://img.shields.io/pypi/pyversions/deshima-sensitivity.svg?label=Python&color=yellow&style=flat-square)](https://pypi.org/pypi/deshima-sensitivity/)
-[![Test](https://img.shields.io/github/workflow/status/deshima-dev/deshima-sensitivity/Test?logo=github&label=Test&style=flat-square)](https://github.com/deshima-dev/deshima-sensitivity/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?label=License&style=flat-square)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.3966839-blue?style=flat-square)](https://doi.org/10.5281/zenodo.3966839)
+[![Release](https://img.shields.io/pypi/v/deshima-sensitivity?label=Release&color=cornflowerblue&style=flat-square)](https://pypi.org/pypi/deshima-sensitivity/)
+[![Python](https://img.shields.io/pypi/pyversions/deshima-sensitivity?label=Python&color=cornflowerblue&style=flat-square)](https://pypi.org/pypi/deshima-sensitivity/)
+[![Downloads](https://img.shields.io/pypi/dm/deshima-sensitivity?label=Downloads&color=cornflowerblue&style=flat-square)](https://pepy.tech/project/deshima-sensitivity)
+[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.3966839-cornflowerblue?style=flat-square)](https://doi.org/10.5281/zenodo.3966839)
+[![Tests](https://img.shields.io/github/workflow/status/deshima-dev/deshima-sensitivity/Tests?label=Tests&style=flat-square)](https://github.com/deshima-dev/deshima-sensitivity/actions/tests.yml)
 
 Sensitivity calculator for DESHIMA-type spectrometers
 
@@ -18,7 +18,7 @@ Click the budge below to open it in [Google colaboratory](http://colab.research.
 
 ### Stable version (recommended)
 
-[![open stable version in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/v0.4.0/sensitivity.ipynb)
+[![open stable version in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deshima-dev/deshima-sensitivity/blob/v0.4.1/sensitivity.ipynb)
 
 ### Latest version
 
