@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>deshima_sensitivity.filter &#8212; Python  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../index.html">
+  Home
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../_apidoc/deshima_sensitivity.html">
+  Package guide
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/deshima-dev/deshima-sensitivity/" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for deshima_sensitivity.filter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># standard library</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="c1"># dependent packages</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">lmfit.models</span> <span class="kn">import</span> <span class="n">LorentzianModel</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">cauchy</span>
+
+<span class="c1"># type aliases</span>
+<span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<span class="c1"># main functions</span>
+<div class="viewcode-block" id="eta_filter_lorentzian"><a class="viewcode-back" href="../../_apidoc/deshima_sensitivity.filter.html#deshima_sensitivity.filter.eta_filter_lorentzian">[docs]</a><span class="k">def</span> <span class="nf">eta_filter_lorentzian</span><span class="p">(</span>
+    <span class="n">F</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">FWHM</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">eta_circuit</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">F_res</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="n">overflow</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">ArrayLike</span><span class="p">,</span>
+<span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the filter transmissions as a matrix of</span>
+<span class="sd">        Lorentzian approximations. Also calculates approximating box filter</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    F</span>
+<span class="sd">        Center frequency of the filter channels.</span>
+<span class="sd">        Units: Hz (works also for GHz, will detect)</span>
+<span class="sd">    FWHM</span>
+<span class="sd">        Full width at half maximum of the filter channels.</span>
+<span class="sd">        Units: same as F.</span>
+<span class="sd">    eta_circuit</span>
+<span class="sd">        Average transmission over the FWHM. Equal to pi/4 times the peak transmission</span>
+<span class="sd">        Units: none.</span>
+<span class="sd">    F_res</span>
+<span class="sd">        The number of frequency bins within a FWHM</span>
+<span class="sd">        Units: none.</span>
+<span class="sd">    Overflow</span>
+<span class="sd">        The number of extra FHWM&#39;s below the first and above the last channel</span>
+<span class="sd">        Units: none.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eta_filter</span>
+<span class="sd">        The filter transmission as an m x n matrix</span>
+<span class="sd">        m: the number of integration bins.</span>
+<span class="sd">        n: the number of filter channels.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    eta_inband</span>
+<span class="sd">        Whether a frequency is out- (false) or inband (true) as an m x n matrix</span>
+<span class="sd">        m: the number of integration bins.</span>
+<span class="sd">        n: the number of filter channels.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    F_int</span>
+<span class="sd">        Frequency integration bins.</span>
+<span class="sd">        Units: Hz.</span>
+<span class="sd">    W_F_int</span>
+<span class="sd">        Integration bandwith bins.</span>
+<span class="sd">        Units: Hz.</span>
+<span class="sd">    box_height</span>
+<span class="sd">        The transmission of the box-filter approximation.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    box-width</span>
+<span class="sd">        The bandwidth of the box-filter approximation.</span>
+<span class="sd">        Units: Hz.</span>
+<span class="sd">    chi-sq</span>
+<span class="sd">        Zero. For compatibility with the .csv fit</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">F</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">F</span> <span class="o">*</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span>
+        <span class="n">FWHM</span> <span class="o">=</span> <span class="n">FWHM</span> <span class="o">*</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span>
+
+    <span class="c1"># give F a length if it is an integer.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">F</span><span class="p">])</span>
+    <span class="c1"># give FWHM a length if it is an integer.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">FWHM</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
+        <span class="n">FWHM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">FWHM</span><span class="p">])</span>
+
+    <span class="n">F_int</span><span class="p">,</span> <span class="n">W_F_int</span> <span class="o">=</span> <span class="n">expand_F</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">FWHM</span><span class="p">,</span> <span class="n">F_res</span><span class="p">,</span> <span class="n">overflow</span><span class="p">)</span>
+
+    <span class="n">eta_filter</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">eta_circuit</span>
+        <span class="o">*</span> <span class="mi">4</span>
+        <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">cauchy</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">F_int</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">FWHM</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">FWHM</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Equivalent in-band box filter approximation</span>
+    <span class="n">box_height</span> <span class="o">=</span> <span class="n">eta_circuit</span>
+    <span class="n">box_width</span> <span class="o">=</span> <span class="n">FWHM</span>
+
+    <span class="n">chi_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+    <span class="n">eta_inband</span> <span class="o">=</span> <span class="n">eta_inband_mask</span><span class="p">(</span><span class="n">F_int</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">eta_filter</span>
+
+    <span class="k">return</span> <span class="n">eta_filter</span><span class="p">,</span> <span class="n">eta_inband</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">F_int</span><span class="p">,</span> <span class="n">W_F_int</span><span class="p">,</span> <span class="n">box_height</span><span class="p">,</span> <span class="n">box_width</span><span class="p">,</span> <span class="n">chi_sq</span></div>
+
+
+<div class="viewcode-block" id="eta_filter_csv"><a class="viewcode-back" href="../../_apidoc/deshima_sensitivity.filter.html#deshima_sensitivity.filter.eta_filter_csv">[docs]</a><span class="k">def</span> <span class="nf">eta_filter_csv</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">ArrayLike</span><span class="p">,</span>
+<span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Read filter transmissionsfrom csv and return filter matrix,</span>
+<span class="sd">    integrationbins and integration bin bandwith</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file</span>
+<span class="sd">        A string to the location of the .csv file</span>
+<span class="sd">        .csv has headers of frequency bins (in GHz) and rows of channels</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eta_filter</span>
+<span class="sd">        The filter transmission as an m x n matrix</span>
+<span class="sd">        m: the number of integration bins.</span>
+<span class="sd">        n: the number of filter channels.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    eta_inband</span>
+<span class="sd">        Whether a frequency is out- (false) or inband (true) as an m x n matrix</span>
+<span class="sd">        m: the number of integration bins.</span>
+<span class="sd">        n: the number of filter channels.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    F</span>
+<span class="sd">        Center frequency of each channel</span>
+<span class="sd">    F_int</span>
+<span class="sd">        The integration bins. Units: Hz.</span>
+<span class="sd">    F_W_int</span>
+<span class="sd">        The integration bandwith. units: Hz.</span>
+<span class="sd">    box_height</span>
+<span class="sd">        The transmission of the box-filter approximation.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    box_width</span>
+<span class="sd">        The bandwidth of the box-filter approximation.</span>
+<span class="sd">        Units: Hz</span>
+<span class="sd">    chi_sqr</span>
+<span class="sd">        The Chi Square value of the Lorentzian fit.</span>
+<span class="sd">        Units: None.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eta_filter_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">F_int</span> <span class="o">=</span> <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">F_int</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span><span class="p">:</span>
+        <span class="n">F_int</span> <span class="o">=</span> <span class="n">F_int</span> <span class="o">*</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span>
+        <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">F_int</span>
+
+    <span class="c1"># Fit to lorentzian model</span>
+    <span class="n">fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">fit_lorentzian</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">x</span><span class="o">=</span><span class="n">F_int</span><span class="p">)</span>
+    <span class="n">fit_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Center&quot;</span><span class="p">,</span> <span class="s2">&quot;HWHM&quot;</span><span class="p">,</span> <span class="s2">&quot;max height&quot;</span><span class="p">,</span> <span class="s2">&quot;chi sq&quot;</span><span class="p">])</span>
+
+    <span class="n">eta_filter_df</span> <span class="o">=</span> <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fit_df</span><span class="p">)</span>
+
+    <span class="c1"># Sort frequency bins</span>
+    <span class="n">eta_filter_df</span> <span class="o">=</span> <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Center&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eta_filter_df</span><span class="p">)),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Extract values</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">eta_filter_df</span><span class="p">[</span><span class="s2">&quot;Center&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Make filter matrix</span>
+    <span class="n">eta_filter</span> <span class="o">=</span> <span class="n">eta_filter_df</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="c1"># calculate integration bandwith, copy second-last bin BW to last</span>
+    <span class="n">W_F_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">F_int</span><span class="p">)</span>
+    <span class="n">W_F_int</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">F_int</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">F_int</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">W_F_int</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_F_int</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="c1"># Equivalent in-band box filter approximation</span>
+    <span class="n">box_height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">eta_filter_df</span><span class="p">[</span><span class="s2">&quot;max height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">box_width</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">eta_filter_df</span><span class="p">[</span><span class="s2">&quot;HWHM&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">chi_sq</span> <span class="o">=</span> <span class="n">eta_filter_df</span><span class="p">[</span><span class="s2">&quot;chi sq&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="n">eta_inband</span> <span class="o">=</span> <span class="n">eta_inband_mask</span><span class="p">(</span><span class="n">F_int</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">box_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">eta_filter</span>
+
+    <span class="k">return</span> <span class="n">eta_filter</span><span class="p">,</span> <span class="n">eta_inband</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">F_int</span><span class="p">,</span> <span class="n">W_F_int</span><span class="p">,</span> <span class="n">box_height</span><span class="p">,</span> <span class="n">box_width</span><span class="p">,</span> <span class="n">chi_sq</span></div>
+
+
+<div class="viewcode-block" id="weighted_average"><a class="viewcode-back" href="../../_apidoc/deshima_sensitivity.filter.html#deshima_sensitivity.filter.weighted_average">[docs]</a><span class="k">def</span> <span class="nf">weighted_average</span><span class="p">(</span><span class="n">var</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">eta_filter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the average of a variable over the filter channels</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    var</span>
+<span class="sd">        A variable varying over the frequency range.</span>
+<span class="sd">        Units: varying.</span>
+<span class="sd">    eta_filter:</span>
+<span class="sd">        The filter transmission as an m x n matrix</span>
+<span class="sd">        m: the number of integration bins.</span>
+<span class="sd">        n: the number of filter channels.</span>
+<span class="sd">        Units: None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    average</span>
+<span class="sd">        The average of var over each filter channel.</span>
+<span class="sd">        Units: same as var.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">var</span>
+
+    <span class="n">var_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">eta_filter</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">var_array</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">eta_filter</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">average</span></div>
+
+
+<span class="c1"># Helper functions</span>
+<div class="viewcode-block" id="expand_F"><a class="viewcode-back" href="../../_apidoc/deshima_sensitivity.filter.html#deshima_sensitivity.filter.expand_F">[docs]</a><span class="k">def</span> <span class="nf">expand_F</span><span class="p">(</span>
+    <span class="n">F</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">FHWM</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">F_res</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="n">overflow</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Expands the given channel(s) to create frequency bins over which to integrate.</span>
+
+<span class="sd">    If a single channel is given the function will expand by 2 * overflow * R</span>
+<span class="sd">    using  2 * F_res * Overflow bins</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    F</span>
+<span class="sd">        Center Frequency of filter channel</span>
+<span class="sd">        Units: Hz (works also for GHz, will detect).</span>
+<span class="sd">    FHWM</span>
+<span class="sd">        The full width at half maximum, given by F/R.</span>
+<span class="sd">        Units: same as F.</span>
+<span class="sd">    F_res</span>
+<span class="sd">        The number of frequency bins within a FWHM</span>
+<span class="sd">        Units: none.</span>
+<span class="sd">    Overflow</span>
+<span class="sd">        The number of extra FHWM&#39;s below the first and above the last channel</span>
+<span class="sd">        Units: none.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    F_int</span>
+<span class="sd">       Frequency bins for later integration.</span>
+<span class="sd">       units: Hz.</span>
+<span class="sd">    W_F_int</span>
+<span class="sd">        Bandwith of each frequency bin.</span>
+<span class="sd">        units: Hz.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">F</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">F</span> <span class="o">*</span> <span class="mf">10.0</span><span class="o">**</span><span class="mi">9</span>
+        <span class="n">FHWM</span> <span class="o">=</span> <span class="n">FHWM</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Entered frequency array</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">overflow</span><span class="p">,</span> <span class="n">N</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">overflow</span><span class="p">,</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">overflow</span><span class="p">)</span> <span class="o">*</span> <span class="n">F_res</span><span class="p">)</span>
+        <span class="n">F_int</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">),</span>
+            <span class="n">F</span><span class="p">,</span>
+            <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;quadratic&quot;</span><span class="p">,</span>
+        <span class="p">)(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Entered a single frequency</span>
+        <span class="n">half_spacing</span> <span class="o">=</span> <span class="n">overflow</span> <span class="o">*</span> <span class="n">FHWM</span>
+        <span class="n">F_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">F</span> <span class="o">-</span> <span class="n">half_spacing</span><span class="p">,</span> <span class="n">F</span> <span class="o">+</span> <span class="n">half_spacing</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">overflow</span> <span class="o">*</span> <span class="n">F_res</span><span class="p">)</span>
+
+    <span class="c1"># calculate integration bandwith</span>
+    <span class="n">W_F_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">F_int</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">F_int</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">F_int</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">F_int</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">F_int</span> <span class="o">=</span> <span class="n">F_int</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">F_int</span><span class="p">,</span> <span class="n">W_F_int</span></div>
+
+
+<div class="viewcode-block" id="fit_lorentzian"><a class="viewcode-back" href="../../_apidoc/deshima_sensitivity.filter.html#deshima_sensitivity.filter.fit_lorentzian">[docs]</a><span class="k">def</span> <span class="nf">fit_lorentzian</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Fits profile to lorentzian. Used with np.apply_along_axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y</span>
+<span class="sd">        y values of profile to be fitted.</span>
+<span class="sd">        Units: none.</span>
+<span class="sd">    x</span>
+<span class="sd">        x values of profiles to be fitted</span>
+<span class="sd">        Units: Hz.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result_params</span>
+<span class="sd">       A numpy array of the returning parameters</span>
+<span class="sd">       [&#39;Center&#39;, &#39;HWHM&#39;, &#39;max height&#39;, &#39;chi sq&#39;].</span>
+<span class="sd">       Units: [same as x, same as x, None, None].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LorentzianModel</span><span class="p">()</span>
+
+    <span class="n">center_guess</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
+    <span class="n">HWHM_guess</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span> <span class="o">/</span> <span class="mi">1000</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">make_params</span><span class="p">(</span>
+        <span class="n">amplitude</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">HWHM_guess</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">center_guess</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">HWHM_guess</span>
+    <span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">result_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">chisqr</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result_params</span></div>
+
+
+<div class="viewcode-block" id="eta_inband_mask"><a class="viewcode-back" href="../../_apidoc/deshima_sensitivity.filter.html#deshima_sensitivity.filter.eta_inband_mask">[docs]</a><span class="k">def</span> <span class="nf">eta_inband_mask</span><span class="p">(</span><span class="n">F_int</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">F</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">HWHM</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Generates an array to use with weighted_average() that averages over</span>
+<span class="sd">    in-band (F +- HWHM) frequencies</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    F_int</span>
+<span class="sd">       Frequency bins for integration.</span>
+<span class="sd">       units: Hz or GHz.</span>
+<span class="sd">    F</span>
+<span class="sd">        Center frequencies of channels.</span>
+<span class="sd">        units: Same as F_int.</span>
+<span class="sd">    HWHM</span>
+<span class="sd">        Half width at half maximum of these channels</span>
+<span class="sd">        units: Same as F_int.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eta_inband</span>
+<span class="sd">        Whether a frequency is out- (false) or inband (true) as an m x n matrix</span>
+<span class="sd">        m: the number of integration bins.</span>
+<span class="sd">        n: the number of filter channels.</span>
+<span class="sd">        Units: None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">HWHM</span> <span class="o">=</span> <span class="n">HWHM</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">F_int</span> <span class="o">=</span> <span class="n">F_int</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">greater_equal</span><span class="p">(</span><span class="n">F_int</span><span class="p">,</span> <span class="n">F</span> <span class="o">-</span> <span class="n">HWHM</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">less_equal</span><span class="p">(</span><span class="n">F_int</span><span class="p">,</span> <span class="n">F</span> <span class="o">+</span> <span class="n">HWHM</span><span class="p">)</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2020-2022 DESHIMA software team.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.1.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
