@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "deshima-sensitivity"
-version = "0.4.1"
+version = "0.4.2"
 description = "Sensitivity calculator for DESHIMA-type spectrometers"
 authors = ["Akira Endo <a.endo@tudelft.nl>"]
 maintainers = [
@@ -29,6 +29,7 @@ pandas = [
     { version = ">=1.3, <1.4", python = ">=3.7.1, <3.8" },
     { version = "^1.3", python = ">=3.8, <3.11" },
 ]
+pandas-dataclasses = "^0.2"
 scipy = "^1.4"
 
 [tool.poetry.dev-dependencies]
@@ -38,6 +39,7 @@ ipython = [
     { version = "^8.4", python = ">=3.8, <3.11" },
 ]
 myst-parser = "^0.18"
+pandas-stubs = "^1.2"
 pydata-sphinx-theme = "^0.9"
 pytest = "^7.1"
 sphinx = "^5.0"

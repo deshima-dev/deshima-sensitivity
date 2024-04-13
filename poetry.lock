@@ -485,6 +485,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "morecopy"
+version = "0.2.4"
+description = "Copy even immutable objects as much as possible"
+category = "main"
+optional = false
+python-versions = ">=3.7,<3.11"
+
+[[package]]
 name = "mypy-extensions"
 version = "0.4.3"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
@@ -555,6 +563,7 @@ numpy = [
     {version = ">=1.17.3", markers = "platform_machine != \"aarch64\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
     {version = ">=1.19.2", markers = "platform_machine == \"aarch64\" and python_version < \"3.10\""},
     {version = ">=1.20.0", markers = "platform_machine == \"arm64\" and python_version < \"3.10\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
 ]
 python-dateutil = ">=2.7.3"
 pytz = ">=2017.3"
@@ -582,6 +591,37 @@ pytz = ">=2020.1"
 
 [package.extras]
 test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
+
+[[package]]
+name = "pandas-dataclasses"
+version = "0.2.0"
+description = "pandas extension for typed Series and DataFrame creation"
+category = "main"
+optional = false
+python-versions = ">=3.7.1,<3.11"
+
+[package.dependencies]
+morecopy = ">=0.2,<0.3"
+numpy = [
+    {version = ">=1.20,<1.22", markers = "python_full_version >= \"3.7.1\" and python_version < \"3.8\""},
+    {version = ">=1.20,<2.0", markers = "python_version >= \"3.8\" and python_version < \"3.11\""},
+]
+pandas = [
+    {version = ">=1.3,<1.4", markers = "python_full_version >= \"3.7.1\" and python_version < \"3.8\""},
+    {version = ">=1.3,<2.0", markers = "python_version >= \"3.8\" and python_version < \"3.11\""},
+]
+typing-extensions = ">=3.10,<4.0"
+
+[[package]]
+name = "pandas-stubs"
+version = "1.2.0.61"
+description = "Type annotations for Pandas"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "parso"
@@ -1004,11 +1044,11 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "typing-extensions"
-version = "4.2.0"
-description = "Backported and Experimental Type Hints for Python 3.7+"
+version = "3.10.0.2"
+description = "Backported and Experimental Type Hints for Python 3.5+"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = "*"
 
 [[package]]
 name = "uncertainties"
@@ -1063,7 +1103,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1, <3.11"
-content-hash = "1affea7e91807a1ad78594804987a681ca9ad14cd40584730faf07e01d2584d6"
+content-hash = "76ea0aa293ee038f2bfe03542c5898342cb9860f2398b6adf9dd4fd4dbada30a"
 
 [metadata.files]
 alabaster = [
@@ -1343,6 +1383,10 @@ mdurl = [
     {file = "mdurl-0.1.1-py3-none-any.whl", hash = "sha256:6a8f6804087b7128040b2fb2ebe242bdc2affaeaa034d5fc9feeed30b443651b"},
     {file = "mdurl-0.1.1.tar.gz", hash = "sha256:f79c9709944df218a4cdb0fcc0b0c7ead2f44594e3e84dc566606f04ad749c20"},
 ]
+morecopy = [
+    {file = "morecopy-0.2.4-py3-none-any.whl", hash = "sha256:ea6c5f998fca2127928fc1b90eccaef9850cf2ff8b975cdce978d3fb09881009"},
+    {file = "morecopy-0.2.4.tar.gz", hash = "sha256:29420a75c66371c9edf05fca7fbf61096557846ebfd1e8881e0d342ac4ea9c7a"},
+]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
@@ -1457,6 +1501,14 @@ pandas = [
     {file = "pandas-1.4.2-cp39-cp39-win32.whl", hash = "sha256:d0d4f13e4be7ce89d7057a786023c461dd9370040bdb5efa0a7fe76b556867a0"},
     {file = "pandas-1.4.2-cp39-cp39-win_amd64.whl", hash = "sha256:09d8be7dd9e1c4c98224c4dfe8abd60d145d934e9fc1f5f411266308ae683e6a"},
     {file = "pandas-1.4.2.tar.gz", hash = "sha256:92bc1fc585f1463ca827b45535957815b7deb218c549b7c18402c322c7549a12"},
+]
+pandas-dataclasses = [
+    {file = "pandas-dataclasses-0.2.0.tar.gz", hash = "sha256:97ca16284c9dec4f7238393b056987705beeca35896599d3e078b82369338b4b"},
+    {file = "pandas_dataclasses-0.2.0-py3-none-any.whl", hash = "sha256:8be8e21172c84826d57a410d2e16464774ad5a2d43a80d694dfed8e4e2694807"},
+]
+pandas-stubs = [
+    {file = "pandas-stubs-1.2.0.61.tar.gz", hash = "sha256:3f2f59da7333b3fb2b216155f0ec26fefda7684d77bd35a096fb0bbdcb938f38"},
+    {file = "pandas_stubs-1.2.0.61-py3-none-any.whl", hash = "sha256:afb6a8d3876af775b8627d8681e9a80bb9c60b6497e75df0329bde41104a91c9"},
 ]
 parso = [
     {file = "parso-0.8.3-py2.py3-none-any.whl", hash = "sha256:c001d4636cd3aecdaf33cbb40aebb59b094be2a74c556778ef5576c175e19e75"},
@@ -1715,8 +1767,9 @@ typed-ast = [
     {file = "typed_ast-1.5.4.tar.gz", hash = "sha256:39e21ceb7388e4bb37f4c679d72707ed46c2fbf2a5609b8b8ebc4b067d977df2"},
 ]
 typing-extensions = [
-    {file = "typing_extensions-4.2.0-py3-none-any.whl", hash = "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708"},
-    {file = "typing_extensions-4.2.0.tar.gz", hash = "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"},
+    {file = "typing_extensions-3.10.0.2-py2-none-any.whl", hash = "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7"},
+    {file = "typing_extensions-3.10.0.2-py3-none-any.whl", hash = "sha256:f1d25edafde516b146ecd0613dabcc61409817af4766fbbcfb8d1ad4ec441a34"},
+    {file = "typing_extensions-3.10.0.2.tar.gz", hash = "sha256:49f75d16ff11f1cd258e1b988ccff82a3ca5570217d7ad8c5f48205dd99a677e"},
 ]
 uncertainties = [
     {file = "uncertainties-3.1.6-py2.py3-none-any.whl", hash = "sha256:cb4a66d5ceda006475ec845bf43ee8956c26138b08f93c41851c25a4ffe19a33"},

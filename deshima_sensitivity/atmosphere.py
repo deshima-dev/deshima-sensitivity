@@ -119,7 +119,7 @@ def eta_atm_interp(eta_atm_dataframe: pd.DataFrame) -> Callable:
             etafun = desim.eta_atm_interp(eta_atm_df)
 
     """
-    x = np.array(list(eta_atm_dataframe)[1:]).astype(np.float)
+    x = np.array(list(eta_atm_dataframe)[1:]).astype(np.float64)
     y = eta_atm_dataframe["F"].values
     z = eta_atm_dataframe.iloc[:, 1:].values
     return interp2d(x, y, z, kind="cubic")
