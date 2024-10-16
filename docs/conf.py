@@ -2,7 +2,7 @@
 project = "deshima-sensitivity"
 copyright = "2020 DESHIMA software team"
 author = "Akira Endo"
-release = "0.3.0"
+release = "0.3.1"
 
 
 # General configuration
