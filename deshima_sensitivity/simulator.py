@@ -23,7 +23,7 @@ def spectrometer_sensitivity(
     F: ArrayLike = 350.0e9,
     pwv: float = 0.5,
     EL: float = 60.0,
-    R: float = 500.0,
+    R: ArrayLike = 500.0,
     eta_M1_spill: ArrayLike = 0.99,
     eta_M2_spill: ArrayLike = 0.90,
     eta_wo_spill: ArrayLike = 0.99,
@@ -260,7 +260,13 @@ def spectrometer_sensitivity(
     )
 
     # Calcuate eta. scalar/vector depending on F.
-    eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
+    if np.size(R)==1:
+        eta_atm = eta_atm_func(F=F, pwv=pwv, EL=EL, R=R)
+    else:
+        eta_atm = np.zeros(len(R))
+
+        for i in range(len(R)):
+            eta_atm[i] = eta_atm_func(F=F[i], pwv=pwv, EL=EL, R=R[i])
 
     # Johnson-Nyquist Power Spectral Density (W/Hz)
     # for the physical temperatures of each stage
