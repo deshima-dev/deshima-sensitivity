@@ -442,7 +442,7 @@ def spectrometer_sensitivity(
     # 3. Output results as Pandas DataFrame
     # ############################################
 
-    result = pd.concat(
+    return pd.concat(
         [
             pd.Series(F, name="F"),
             pd.Series(pwv, name="PWV"),
@@ -491,6 +491,3 @@ def spectrometer_sensitivity(
         ],
         axis=1,
     )
-
-    # Turn Scalar values into vectors
-    return result.fillna(method="ffill")
